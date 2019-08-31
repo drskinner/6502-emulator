@@ -20,13 +20,11 @@ E(X)IT        - Exits MONITOR
 (?)           - Display this help file
 =end
 
-require './monitor.rb'
+require './assembler.rb'
 
-m = Monitor.new
-Monitor.instance_methods
-m.set_up
-m.registers
-m.main_loop
+asm = Assembler.new
+asm.registers
+asm.main_loop
 
 exit(0)
 
