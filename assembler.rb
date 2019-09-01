@@ -22,6 +22,14 @@ class Assembler
     (value >= 32 && value <= 127) ? value.chr : '.'
   end
 
+  def jump(command)
+    parts = command.split(' ')
+    return if parts[1].nil?
+
+    @cpu.execute(address: parts[1].to_i(16) & 0xffff)
+    registers
+  end
+
   def memory(command)
     parts = command.split(' ')
 
@@ -97,6 +105,8 @@ class Assembler
       command = gets.chomp
 
       case command[0]
+      when 'j'
+        jump(command)
       when 'm'
         memory(command)
       when 'r'
