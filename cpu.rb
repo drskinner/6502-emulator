@@ -15,9 +15,14 @@ class Cpu
     @ram = Array.new(65536).fill(0x00)
   end
 
-  def read(address:)
+  def read_ram(address:)
     return 0x00 if address < 0x0000 || address > 0xffff
     @ram[address]
+  end
+
+  def write_ram(address:, data:)
+    return if address < 0x0000 || address > 0xffff || data < 0x00 || data > 0xff
+    @ram[address] = data
   end
 
 end

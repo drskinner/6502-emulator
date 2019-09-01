@@ -31,12 +31,13 @@ class Assembler
     while (@memory_pager <= top)
       print "> #{word(@memory_pager & 0xffff)} "
       (0..7).each do |offset|
-        print "#{byte @cpu.read(address: (@memory_pager + offset) & 0xffff)} "
+        print "#{byte @cpu.read_ram(address: (@memory_pager + offset) & 0xffff)} "
       end
       (0..7).each do |offset|
-        print ascii_to_char(@cpu.read(address: (@memory_pager + offset) & 0xffff))
+        print ascii_to_char(@cpu.read_ram(address: (@memory_pager + offset) & 0xffff))
       end
       
+      puts
       @memory_pager += 0x08
     end
 
@@ -73,6 +74,22 @@ class Assembler
     registers
   end
 
+  def write_memory(command)
+    parts = command.split(' ')
+    return if parts.count < 3
+
+    start_address = parts[1].to_i(16)
+    if (start_address < 0x000 || start_address > 0xffff)
+      puts '?'
+      return
+    end
+
+    parts.shift(2)
+    parts.each_with_index do |value, index|
+      @cpu.write_ram(address: (start_address + index) & 0xffff, data: value.to_i(16))
+    end
+  end
+
   def main_loop
     running = true
 
@@ -89,6 +106,8 @@ class Assembler
         running = false
       when ';'
         set_registers(command)
+      when '>'
+        write_memory(command)
       else
         puts '?'
       end
