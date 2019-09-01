@@ -38,13 +38,39 @@ class Assembler
       end
       
       @memory_pager += 0x08
-      puts
     end
+
+    @memory_pager &= 0xffff
   end
 
   def registers
     puts '   PC  SR AC XR YR SP'
-    puts "; #{@cpu.register_display}"
+    print '; '
+    puts [].tap { |_|
+           _ << word(@cpu.program_counter)
+           _ << byte(@cpu.status_register)
+           _ << byte(@cpu.accumulator)
+           _ << byte(@cpu.x_register)
+           _ << byte(@cpu.y_register)
+           _ << byte(@cpu.stack_pointer)
+         }.join(' ')
+  end
+
+  def set_registers(command)
+    parts = command.split(' ')
+    if (parts.count != 7)
+      puts '?'
+      return
+    end
+
+    @cpu.program_counter=(parts[1].to_i(16))
+    @cpu.status_register=(parts[2].to_i(16))
+    @cpu.accumulator=(parts[3].to_i(16))
+    @cpu.x_register=(parts[4].to_i(16))
+    @cpu.y_register=(parts[5].to_i(16))
+    @cpu.stack_pointer=(parts[6].to_i(16))
+    puts
+    registers
   end
 
   def main_loop
@@ -61,6 +87,8 @@ class Assembler
       when 'x'
         puts 'BYE.'
         running = false
+      when ';'
+        set_registers(command)
       else
         puts '?'
       end

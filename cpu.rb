@@ -1,4 +1,8 @@
+require './cpu_registers.rb'
+
 class Cpu
+  include CpuRegisters
+
   def initialize 
     @accumulator     = 0x00
     @x_register      = 0x00
@@ -11,19 +15,9 @@ class Cpu
     @ram = Array.new(65536).fill(0x00)
   end
 
-  def register_display
-    [].tap { |_|
-      _ << '%04X' % @program_counter
-      _ << '%02X' % @status_register
-      _ << '%02X' % @accumulator
-      _ << '%02X' % @x_register
-      _ << '%02X' % @y_register
-      _ << '%02X' % @stack_pointer
-    }.join(' ')
-  end
-
   def read(address:)
     return 0x00 if address < 0x0000 || address > 0xffff
     @ram[address]
   end
+
 end
