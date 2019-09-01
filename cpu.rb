@@ -1,8 +1,10 @@
-require './cpu_registers.rb'
 require './cpu_opcodes.rb'
+require './cpu_registers.rb'
+require './cpu_status_register.rb'
 
 class Cpu
   include CpuRegisters
+  include CpuStatusRegister
 
   def initialize 
     @accumulator     = 0x00
@@ -46,6 +48,8 @@ class Cpu
   #
   # address modes
   #
+
+  # we don't actually need to call for an address in implied mode
   def implied
     puts ' IMPLIED MODE CALLED'
   end
@@ -57,11 +61,48 @@ class Cpu
   def BRK(mode)
     print "Executing #{@program_counter}: BRK (#{mode})"
     method(mode).call
+    set_flag(SR_BREAK)
+  end
+
+  def CLC(mode)
+    print "Executing #{@program_counter}: CLC (#{mode})"
+    method(mode).call
+    clear_flag(SR_CARRY)
+  end
+
+  def CLD(mode)
+    print "Executing #{@program_counter}: CLD (#{mode})"
+    method(mode).call
+    clear_flag(SR_DECIMAL)
+  end
+
+  def CLI(mode)
+    print "Executing #{@program_counter}: CLI (#{mode})"
+    method(mode).call
+    clear_flag(SR_INTERRUPT)
   end
 
   def NOP(mode)
     print "Executing #{@program_counter}: NOP (#{mode})"
     method(mode).call
+  end
+
+  def SEC(mode)
+    print "Executing #{@program_counter}: SEC (#{mode})"
+    method(mode).call
+    set_flag(SR_CARRY)
+  end
+
+  def SED(mode)
+    print "Executing #{@program_counter}: SED (#{mode})"
+    method(mode).call
+    set_flag(SR_DECIMAL)
+  end
+
+  def SEI(mode)
+    print "Executing #{@program_counter}: SED (#{mode})"
+    method(mode).call
+    set_flag(SR_INTERRUPT)
   end
 
 end
