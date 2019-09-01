@@ -16,6 +16,8 @@ class Cpu
 
     # Someday, we'll get on the bus...
     @ram = Array.new(65536).fill(0x00)
+
+    @running = false
   end
 
   def read_ram(address:)
@@ -29,19 +31,22 @@ class Cpu
   end
 
   def execute(address:)
-    running = true
+    @running = true
     @program_counter = address
 
-    while running
+    while @running
       opcode = @ram[@program_counter]
 
-      instruction = OPCODES[opcode][0]
-      address_mode = OPCODES[opcode][1]
+      if (OPCODES[opcode])
+        instruction = OPCODES[opcode][0]
+        address_mode = OPCODES[opcode][1]
+      else
+        instruction = 'JAM'
+        address_mode = 'implied'
+      end
 
       method(instruction).call(address_mode)
       @program_counter += 1
-
-      running = false if opcode.zero?
     end
   end
 
@@ -49,7 +54,8 @@ class Cpu
   # address modes
   #
 
-  # we don't actually need to call for an address in implied mode
+  # we don't actually need to call for an address in implied mode;
+  # this method could be empty but this puts is useful for debugging.
   def implied
     puts ' IMPLIED MODE CALLED'
   end
@@ -62,6 +68,7 @@ class Cpu
     print "Executing #{@program_counter}: BRK (#{mode})"
     method(mode).call
     set_flag(SR_BREAK)
+    @running = false
   end
 
   def CLC(mode)
@@ -80,6 +87,11 @@ class Cpu
     print "Executing #{@program_counter}: CLI (#{mode})"
     method(mode).call
     clear_flag(SR_INTERRUPT)
+  end
+
+  def JAM(mode)
+    puts "Undefined OPCODE at #{'%04X' % @program_counter}"
+    @running = false
   end
 
   def NOP(mode)
