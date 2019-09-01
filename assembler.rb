@@ -22,7 +22,7 @@ class Assembler
     (value >= 32 && value <= 127) ? value.chr : '.'
   end
 
-  def jump(command)
+  def go(command)
     parts = command.split(' ')
     return if parts[1].nil?
 
@@ -105,8 +105,8 @@ class Assembler
       command = gets.chomp
 
       case command[0]
-      when 'j'
-        jump(command)
+      when 'g'
+        go(command)
       when 'm'
         memory(command)
       when 'r'
