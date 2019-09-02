@@ -25,9 +25,9 @@ class MyTest < Test::Unit::TestCase
     load_memory %w[00]
     
     @cpu.clear_flag(SR_BREAK)
-    @cpu.execute(address: 0xc000)
+    @cpu.execute(address: @base_address)
     assert_equal(true, @cpu.set?(SR_BREAK))
-    assert_equal(0xc001, @cpu.program_counter)
+    assert_equal(@base_address + 0x01, @cpu.program_counter)
   end
 
   # C000 CLC
@@ -37,7 +37,7 @@ class MyTest < Test::Unit::TestCase
   def test_CLC_SEC
     load_memory %w[18 00 38 00]
 
-    @cpu.execute(address: 0xc000)
+    @cpu.execute(address: @base_address)
     assert_equal(false, @cpu.set?(SR_CARRY))
     @cpu.execute(address: @cpu.program_counter)
     assert_equal(true, @cpu.set?(SR_CARRY))
@@ -51,7 +51,7 @@ class MyTest < Test::Unit::TestCase
   def test_CLD_SED
     load_memory %w[d8 00 f8 00]
 
-    @cpu.execute(address: 0xc000)
+    @cpu.execute(address: @base_address)
     assert_equal(false, @cpu.set?(SR_DECIMAL))
     @cpu.execute(address: @cpu.program_counter)
     assert_equal(true, @cpu.set?(SR_DECIMAL))
@@ -65,7 +65,7 @@ class MyTest < Test::Unit::TestCase
   def test_CLI_SEI
     load_memory %w[58 00 78 00]
 
-    @cpu.execute(address: 0xc000)
+    @cpu.execute(address: @base_address)
     assert_equal(false, @cpu.set?(SR_INTERRUPT))
     @cpu.execute(address: @cpu.program_counter)
     assert_equal(true, @cpu.set?(SR_INTERRUPT))
@@ -85,7 +85,7 @@ class MyTest < Test::Unit::TestCase
   def test_LDA
     load_memory %w[a9 40 00 a9 00 00 a9 ff 00 a5 80 00 ad 03 c0]
 
-    @cpu.execute(address: 0xc000)
+    @cpu.execute(address: @base_address)
     assert_equal(0x40, @cpu.accumulator)
     assert_equal(false, @cpu.set?(SR_ZERO))
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
@@ -114,9 +114,9 @@ class MyTest < Test::Unit::TestCase
     load_memory %w[ea 00]
     
     @cpu.clear_flag(SR_BREAK)
-    @cpu.execute(address: 0xc000)
+    @cpu.execute(address: @base_address)
     assert_equal(true, @cpu.set?(SR_BREAK))
-    assert_equal(0xc002, @cpu.program_counter)
+    assert_equal(@base_address + 0x02, @cpu.program_counter)
   end
 
 end
