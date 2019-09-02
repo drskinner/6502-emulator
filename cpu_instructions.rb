@@ -30,6 +30,46 @@ module CpuInstructions
     clear_flag(SR_INTERRUPT)
   end
 
+  #
+  # Subtract 1 from X with roll-over.
+  # Subtracting 0x01 is equivalent to adding 0xff with a subsequent mask.
+  #
+  def DEX(mode)
+    print "Executing #{'%04X' % @program_counter}: DEX (#{mode})" if @log
+    method(mode).call
+
+    @x_register = (@x_register + 0xff) & 0xff
+    @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
+
+  def DEY(mode)
+    print "Executing #{'%04X' % @program_counter}: DEY (#{mode})" if @log
+    method(mode).call
+
+    @y_register = (@y_register + 0xff) & 0xff
+    @y_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@y_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
+
+  def INX(mode)
+    print "Executing #{'%04X' % @program_counter}: INX (#{mode})" if @log
+    method(mode).call
+
+    @x_register = (@x_register + 0x01) & 0xff
+    @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
+
+  def INY(mode)
+    print "Executing #{'%04X' % @program_counter}: INY (#{mode})" if @log
+    method(mode).call
+
+    @y_register = (@y_register + 0x01) & 0xff
+    @y_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@y_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
+
   def JAM(mode)
     puts "Undefined OPCODE at #{'%04X' % @program_counter}"
     @running = false

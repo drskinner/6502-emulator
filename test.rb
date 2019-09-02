@@ -72,6 +72,82 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xc004, @cpu.program_counter)
   end
 
+  # C000 DEX
+  # C001 BRK
+  # C002 DEX
+  # C003 BRK
+  def test_DEX
+    load_memory %w[ca 00 ca 00]
+
+    @cpu.x_register = 0x01
+    @cpu.execute(address: @base_address)
+    assert_equal(0x00, @cpu.x_register)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xff, @cpu.x_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 DEY
+  # C001 BRK
+  # C002 DEY
+  # C003 BRK
+  def test_DEY
+    load_memory %w[88 00 88 00]
+
+    @cpu.y_register = 0x01
+    @cpu.execute(address: @base_address)
+    assert_equal(0x00, @cpu.y_register)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xff, @cpu.y_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 INX
+  # C001 BRK
+  # C002 INX
+  # C003 BRK
+  def test_INX
+    load_memory %w[e8 00 e8 00]
+
+    @cpu.x_register = 0xfe
+    @cpu.execute(address: @base_address)
+    assert_equal(0xff, @cpu.x_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.x_register)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 INY
+  # C001 BRK
+  # C002 INY
+  # C003 BRK
+  def test_INY
+    load_memory %w[c8 00 c8 00]
+
+    @cpu.y_register = 0xfe
+    @cpu.execute(address: @base_address)
+    assert_equal(0xff, @cpu.y_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.y_register)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
   # C000 LDA #$40  ; immediate
   # C002 BRK
   # C003 LDA #$00  ; test Z flag
