@@ -2,32 +2,15 @@ module CpuRegisters
   #
   # register read methods
   #
-  def accumulator
-    @accumulator
-  end
-
-  def program_counter
-    @program_counter
-  end
-
-  def stack_pointer
-    @stack_pointer
-  end
-
-  def status_register
-    @status_register
-  end
-
-  def x_register
-    @x_register
-  end
-
-  def y_register
-    @y_register
-  end
+  attr_reader :accumulator
+  attr_reader :program_counter
+  attr_reader :stack_pointer
+  attr_reader :status_register
+  attr_reader :x_register
+  attr_reader :y_register
 
   #
-  # register write methods
+  # register write methods; enforce bit widths
   #
   def accumulator=(byte)
     return if byte < 0x00 || byte > 0xff

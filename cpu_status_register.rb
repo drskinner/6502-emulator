@@ -7,7 +7,8 @@ module CpuStatusRegister
     @status_register &= ~flag
   end
 
+  # Ruby is terrible at casting to boolean
   def set?(flag)
-    @status_register & flag
+    (@status_register & flag == 0) ? false : true
   end
 end

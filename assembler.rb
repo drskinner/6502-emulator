@@ -2,7 +2,7 @@ require './cpu.rb'
 
 class Assembler
   def initialize
-    @cpu = Cpu.new
+    @cpu = Cpu.new(true)
     @memory_pager = 0x0000
 
     puts

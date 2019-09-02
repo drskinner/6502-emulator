@@ -10,7 +10,7 @@ class Cpu
   include CpuAddressModes
   include CpuInstructions
 
-  def initialize 
+  def initialize(log = false)
     @accumulator     = 0x00
     @x_register      = 0x00
     @y_register      = 0x00
@@ -21,6 +21,7 @@ class Cpu
     # Someday, we'll get on the bus...
     @ram = Array.new(65536).fill(0x00)
 
+    @log = log
     @running = false
   end
 
