@@ -50,7 +50,9 @@ class Cpu
         address_mode = 'implied'
       end
 
-      method(instruction).call(address_mode)
+      method(instruction).call(address: method(address_mode).call)
+      puts "Executing #{'%04X' % @program_counter}: #{instruction} (#{address_mode})" if @log
+
       @program_counter += 1
     end
   end

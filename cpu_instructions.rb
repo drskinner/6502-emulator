@@ -5,28 +5,20 @@ module CpuInstructions
   # Normally, BRK would trigger an interrupt request.
   # We can at least set the B status flag.
   #
-  def BRK(mode)
-    print "Executing #{@program_counter}: BRK (#{mode})" if @log
-    method(mode).call
+  def BRK(address)
     set_flag(SR_BREAK)
     @running = false
   end
 
-  def CLC(mode)
-    print "Executing #{'%04X' % @program_counter}: CLC (#{mode})" if @log
-    method(mode).call
+  def CLC(address)
     clear_flag(SR_CARRY)
   end
 
-  def CLD(mode)
-    print "Executing #{'%04X' % @program_counter}: CLD (#{mode})" if @log
-    method(mode).call
+  def CLD(address)
     clear_flag(SR_DECIMAL)
   end
 
-  def CLI(mode)
-    print "Executing #{'%04X' % @program_counter}: CLI (#{mode})" if @log
-    method(mode).call
+  def CLI(address)
     clear_flag(SR_INTERRUPT)
   end
 
@@ -34,43 +26,31 @@ module CpuInstructions
   # Subtract 1 from X with roll-over.
   # Subtracting 0x01 is equivalent to adding 0xff with a subsequent mask.
   #
-  def DEX(mode)
-    print "Executing #{'%04X' % @program_counter}: DEX (#{mode})" if @log
-    method(mode).call
-
+  def DEX(address)
     @x_register = (@x_register + 0xff) & 0xff
     @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
     (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
   end
 
-  def DEY(mode)
-    print "Executing #{'%04X' % @program_counter}: DEY (#{mode})" if @log
-    method(mode).call
-
+  def DEY(address)
     @y_register = (@y_register + 0xff) & 0xff
     @y_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
     (@y_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
   end
 
-  def INX(mode)
-    print "Executing #{'%04X' % @program_counter}: INX (#{mode})" if @log
-    method(mode).call
-
+  def INX(address)
     @x_register = (@x_register + 0x01) & 0xff
     @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
     (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
   end
 
-  def INY(mode)
-    print "Executing #{'%04X' % @program_counter}: INY (#{mode})" if @log
-    method(mode).call
-
+  def INY(address)
     @y_register = (@y_register + 0x01) & 0xff
     @y_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
     (@y_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
   end
 
-  def JAM(mode)
+  def JAM(address)
     puts "Undefined OPCODE at #{'%04X' % @program_counter}"
     @running = false
   end
@@ -79,36 +59,25 @@ module CpuInstructions
   # Load Accumulator with a byte value. Has many address modes.
   # Z flag set if AC == 0; N flag set if AC bit 7 is set
   #
-  def LDA(mode)
-    print "Executing #{'%04X' % @program_counter}: LDA (#{mode})" if @log
-    address = method(mode).call
-    puts "Returned lookup at #{'%04X' % address}" if @log
+  def LDA(address:)
+    puts "LDA: Returning lookup at #{'%04X' % address}" if @log
     @accumulator = @ram[address]
 
     @accumulator.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
     (@accumulator & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
   end
 
-  def NOP(mode)
-    print "Executing #{'%04X' % @program_counter}: NOP (#{mode})" if @log
-    method(mode).call
-  end
+  def NOP(address); end
 
-  def SEC(mode)
-    print "Executing #{'%04X' % @program_counter}: SEC (#{mode})" if @log
-    method(mode).call
+  def SEC(address)
     set_flag(SR_CARRY)
   end
 
-  def SED(mode)
-    print "Executing #{'%04X' % @program_counter}: SED (#{mode})" if @log
-    method(mode).call
+  def SED(address)
     set_flag(SR_DECIMAL)
   end
 
-  def SEI(mode)
-    print "Executing #{'%04X' % @program_counter}: SED (#{mode})" if @log
-    method(mode).call
+  def SEI(address)
     set_flag(SR_INTERRUPT)
   end
 end
