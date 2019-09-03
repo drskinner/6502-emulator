@@ -7,7 +7,7 @@ require './cpu.rb'
 #
 class MyTest < Test::Unit::TestCase
   def setup
-    @cpu = Cpu.new
+    @cpu = Cpu.new(true)
     @base_address = 0xc000
   end
 
@@ -72,10 +72,54 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xc004, @cpu.program_counter)
   end
 
-  # C000 DEX
-  # C001 BRK
-  # C002 DEX
-  # C003 BRK
+  # C000 DEC $80 ; zero page
+  # C002 BRK
+  # C003 DEC $80
+  # C005 BRK
+  # C006 DEC $C003
+  # C008 BRK
+  # C009 DEC $80,X
+  # C00C BRK
+  # C00D DEC $80,X
+  # C00F BRK
+  # C010 DEC $C000,X
+  # C013 BRK
+  def test_DEC
+    load_memory %w[c6 80 00 c6 80 00 ce 03 c0 00 d6 80 00 d6 80 00 de 00 c0 00 de ff ff]
+
+    @cpu.write_ram(address: 0x0080, data: 0x01)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x00, @cpu.read_ram(address: 0x0080))
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xff, @cpu.read_ram(address: 0x0080))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xc5, @cpu.read_ram(address: 0xc003))
+
+    @cpu.x_register = 0x0f
+    @cpu.write_ram(address: 0x008f, data: 0xc0)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xbf, @cpu.read_ram(address: 0x008f))
+
+    @cpu.x_register = 0xff
+    @cpu.write_ram(address: 0x007f, data: 0xd0)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xcf, @cpu.read_ram(address: 0x007f))
+
+    @cpu.x_register = 0x03
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xc4, @cpu.read_ram(address: 0xc003))
+
+    @cpu.write_ram(address: 0x0002, data: 0xe0)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xdf, @cpu.read_ram(address: 0x0002))
+  end
+
   def test_DEX
     load_memory %w[ca 00 ca 00]
 

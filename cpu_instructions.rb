@@ -5,52 +5,59 @@ module CpuInstructions
   # Normally, BRK would trigger an interrupt request.
   # We can at least set the B status flag.
   #
-  def BRK(address)
+  def BRK(address:)
     set_flag(SR_BREAK)
     @running = false
   end
 
-  def CLC(address)
+  def CLC(address:)
     clear_flag(SR_CARRY)
   end
 
-  def CLD(address)
+  def CLD(address:)
     clear_flag(SR_DECIMAL)
   end
 
-  def CLI(address)
+  def CLI(address:)
     clear_flag(SR_INTERRUPT)
   end
 
   #
-  # Subtract 1 from X with roll-over.
+  # Subtract 1 from memory with wrap-around.
+  # We can simulate this wrapping with (byte + 0x100 - 0x01) & 0xff.
   # Subtracting 0x01 is equivalent to adding 0xff with a subsequent mask.
   #
-  def DEX(address)
+  def DEC(address:)
+    @ram[address] = (@ram[address] + 0xff) & 0xff
+    @ram[address].zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@ram[address] & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
+
+  def DEX(address:)
     @x_register = (@x_register + 0xff) & 0xff
     @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
     (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
   end
 
-  def DEY(address)
+  def DEY(address:)
     @y_register = (@y_register + 0xff) & 0xff
     @y_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
     (@y_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
   end
 
-  def INX(address)
+  def INX(address:)
     @x_register = (@x_register + 0x01) & 0xff
     @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
     (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
   end
 
-  def INY(address)
+  def INY(address:)
     @y_register = (@y_register + 0x01) & 0xff
     @y_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
     (@y_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
   end
 
-  def JAM(address)
+  def JAM(address:)
     puts "Undefined OPCODE at #{'%04X' % @program_counter}"
     @running = false
   end
@@ -67,17 +74,17 @@ module CpuInstructions
     (@accumulator & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
   end
 
-  def NOP(address); end
+  def NOP(address:); end
 
-  def SEC(address)
+  def SEC(address:)
     set_flag(SR_CARRY)
   end
 
-  def SED(address)
+  def SED(address:)
     set_flag(SR_DECIMAL)
   end
 
-  def SEI(address)
+  def SEI(address:)
     set_flag(SR_INTERRUPT)
   end
 end
