@@ -7,7 +7,7 @@ require './cpu.rb'
 #
 class MyTest < Test::Unit::TestCase
   def setup
-    @cpu = Cpu.new(true)
+    @cpu = Cpu.new
     @base_address = 0xc000
   end
 
@@ -192,40 +192,67 @@ class MyTest < Test::Unit::TestCase
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
   end
 
-  # C000 LDA #$40  ; immediate
+  # C000 LDA #$40    ; immediate
   # C002 BRK
-  # C003 LDA #$00  ; test Z flag
+  # C003 LDA #$00    ; test Z flag
   # C005 BRK
-  # C006 LDA #$FF  ; test N flag
+  # C006 LDA #$FF    ; test N flag
   # C008 BRK
-  # C009 LDA $80   ; zero-page
-  # C00C BRK
-  # C00D LDA $C000 ; absolute
-  # C010 BRK
+  # C009 LDA $80     ; zero-page
+  # C00B BRK
+  # C00C LDA $C000   ; absolute
+  # C00F BRK
+  # C010 LDA $70,x   ; zero-page,x
+  # C012 BRK
+  # C013 LDA $c000,x ; absolute,x
+  # C016 BRK
+  # C017 LDA $c000,y ; absolute,y
+  # C01A BRK
   def test_LDA
-    load_memory %w[a9 40 00 a9 00 00 a9 ff 00 a5 80 00 ad 03 c0]
+    bytes =  %w[a9 40 00 a9 00 00 a9 ff 00 a5 80 00 ad 03 c0 00]
+    bytes += %w[b5 70 00 bd 00 c0 00 b9 00 c0 00]
+    load_memory(bytes)
 
+    # A = #$40
     @cpu.execute(address: @base_address)
     assert_equal(0x40, @cpu.accumulator)
     assert_equal(false, @cpu.set?(SR_ZERO))
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
     
+    # A = #$00 ; test Z flag
     @cpu.execute(address: @cpu.program_counter)
     assert_equal(0x00, @cpu.accumulator)
     assert_equal(true, @cpu.set?(SR_ZERO))
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
 
+    # A = #$ff ; test N flag
     @cpu.execute(address: @cpu.program_counter)
     assert_equal(0xFF, @cpu.accumulator)
     assert_equal(false, @cpu.set?(SR_ZERO))
     assert_equal(true, @cpu.set?(SR_NEGATIVE))
 
+    # $0080 = #$ff
     @cpu.write_ram(address: 0x0080, data: 0xff)
     @cpu.execute(address: @cpu.program_counter)
     assert_equal(0xff, @cpu.accumulator)
 
+    # $c000 = #$a9
     @cpu.execute(address: @cpu.program_counter)
     assert_equal(0xa9, @cpu.accumulator)
+
+    # $0080 = #$ff
+    @cpu.x_register = 0x10
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xff, @cpu.accumulator)
+
+    # $c010 = #$b5
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xb5, @cpu.accumulator)
+
+    # $c00c = #$ad
+    @cpu.y_register = 0x0c
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xad, @cpu.accumulator)
   end
 
   # C000 NOP

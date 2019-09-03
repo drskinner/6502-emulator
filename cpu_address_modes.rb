@@ -51,4 +51,18 @@ module CpuAddressModes
 
     (hi * 0x0100 + lo + @x_register) & 0xffff
   end
+
+  # In absolute_y, the Y register is added to the 2-byte address to get the
+  # target address. Overflow addresses "wrap around" from 0xffff to 0x0000.
+  #
+  # TODO: when the calculated address is on a different page from the operand
+  # address, the instruction will require an extra clock cycle to execute.
+  def absolute_y
+    @program_counter += 1
+    lo = @ram[@program_counter]
+    @program_counter += 1
+    hi = @ram[@program_counter]
+
+    (hi * 0x0100 + lo + @y_register) & 0xffff
+  end
 end
