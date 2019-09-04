@@ -265,15 +265,42 @@ class MyTest < Test::Unit::TestCase
     assert_equal(true, @cpu.set?(SR_NEGATIVE))
   end
 
+  # C000 LDA ($F0,X)
+  # C002 BRK
+  # C003 LDA ($F0,X)
+  # C005 BRK
+  #
+  # This address mode is why I write unit tests. Yeesh.
+  #
+  def test_LDA_indirect_x
+    load_memory %w[a1 f0 00 a1 f0 00]
+
+    # $00fe-$00ff points to $c0f0
+    @cpu.write_ram(address: 0x00fe, data: 0xf0)
+    @cpu.write_ram(address: 0x00ff, data: 0xc0)
+    @cpu.write_ram(address: 0xc0f0, data: 0xee)
+    @cpu.x_register = 0x0e
+    @cpu.execute(address: @base_address)
+    assert_equal(0xee, @cpu.accumulator)
+
+    # test page-wrapping
+    @cpu.write_ram(address: 0x0002, data: 0xf0)
+    @cpu.write_ram(address: 0x0003, data: 0xc1)
+    @cpu.write_ram(address: 0xc1f0, data: 0xed)
+    @cpu.x_register = 0x12
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xed, @cpu.accumulator)
+  end
+
   # C000 LDA ($FE),Y
   # C002 BRK
   # C003 LDA ($FE),Y
   # C005 BRK
   #
-  # This address mode is why I write unit tests. Yeesh.
+  # This address mode is also why I write unit tests.
   #
   def test_LDA_indirect_y
-    load_memory %w[a1 fe 00 a1 fe 00]
+    load_memory %w[b1 fe 00 b1 fe 00]
 
     # $00fe-$00ff points to $c0f0
     @cpu.write_ram(address: 0x00fe, data: 0xf0)

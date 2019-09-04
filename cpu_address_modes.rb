@@ -66,9 +66,9 @@ module CpuAddressModes
     (hi * 0x0100 + lo + @y_register) & 0xffff
   end
 
-  # indirect_y is more correctly called "Indirect, Indexed"
+  # indirect_y is more correctly called "Indirect, Indexed".
   # Indirect, Indexed mode has, as its operand, a zero-page address that
-  # holds the low-byte of a little-endian two-byte address. To this
+  # holds the low byte of a little-endian two-byte address. To this
   # two-byte address, we add the value of the Y register to determine
   # the final "effective" address.
   #
@@ -83,4 +83,20 @@ module CpuAddressModes
     (hi * 0x0100 + lo + @y_register) & 0xffff
   end
 
+  # indirect_x is more correctly called "Indexed, Indirect". In this mode,
+  # the 8-bit operand is added to the X register. The result is the low byte
+  # of a little-endian two-byte effective address. Zero-page addresses "wrap",
+  # so there will be no clock-cycle penalty for crossing a page boundary.
+  #
+  # "You may never need to use this mode. Indeed, most programmers lead
+  #  full, rich lives without ever writing code that uses indirect, indexed
+  #  addressing." -- Jim Butterfield
+  def indirect_x
+    @program_counter += 1
+    zero_page_address = (@ram[@program_counter] + @x_register) & 0xff
+    lo = @ram[zero_page_address] & 0xff
+    hi = @ram[zero_page_address + 1] & 0xff
+
+    (hi * 0x0100 + lo + @y_register) & 0xffff
+  end
 end

@@ -1,3 +1,5 @@
+# This will be a long list but it has to be defined somewhere.
+
 OPCODES = {
   0x00 => %w[BRK implied     1 7],
   0x18 => %w[CLC implied     1 2],
@@ -7,8 +9,9 @@ OPCODES = {
   0x88 => %w[DEY implied     1 2],
   0xa5 => %w[LDA zero_page   2 3],
   0xa9 => %w[LDA immediate   2 2],
-  0xa1 => %w[LDA indirect_y  2 5],
+  0xa1 => %w[LDA indirect_x  2 6],
   0xad => %w[LDA absolute    3 4],
+  0xb1 => %w[LDA indirect_y  2 5],
   0xb5 => %w[LDA zero_page_x 2 4],
   0xb9 => %w[LDA absolute_y  3 4],
   0xbd => %w[LDA absolute_x  3 4],
