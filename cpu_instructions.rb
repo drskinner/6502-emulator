@@ -84,6 +84,17 @@ module CpuInstructions
     (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
   end
 
+  #
+  # Load Y register with a byte value. Has many address modes.
+  # Z flag set if YR == 0; N flag set if YR bit 7 is set
+  #
+  def LDY(address:)
+    @y_register = @ram[address]
+
+    @y_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@y_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
+
   def NOP(address:); end
 
   def SEC(address:)
