@@ -45,6 +45,16 @@ module CpuInstructions
     (@y_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
   end
 
+  #
+  # Add 1 from memory with wrap-around.
+  # We can simulate this wrapping with (byte + 0x01) & 0xff.
+  #
+  def INC(address:)
+    @ram[address] = (@ram[address] + 0x01) & 0xff
+    @ram[address].zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@ram[address] & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
+
   def INX(address:)
     @x_register = (@x_register + 0x01) & 0xff
     @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)

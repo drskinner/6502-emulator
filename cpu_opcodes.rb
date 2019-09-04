@@ -32,7 +32,11 @@ OPCODES = {
   0xd6 => %w[DEC zero_page_x 2 6],
   0xd8 => %w[CLD implied     1 2],
   0xde => %w[DEC absolute_x  3 7],
+  0xe6 => %w[INC zero_page   2 5],
   0xe8 => %w[INX implied     1 2],
   0xea => %w[NOP implied     1 2],
-  0Xf8 => %w[SED implied     1 2]
+  0xee => %w[INC absolute    3 6],
+  0xf6 => %w[INC zero_page_x 2 6],
+  0xf8 => %w[SED implied     1 2],
+  0xfe => %w[INC absolute_x  3 7]
 }

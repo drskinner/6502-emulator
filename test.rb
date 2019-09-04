@@ -76,7 +76,7 @@ class MyTest < Test::Unit::TestCase
   # BRK
   def test_DEC_absolute_x
     load_memory %w[de 20 c0 00 de ff ff 00]
-  
+
     @cpu.write_ram(address: 0xc023, data: 0xd0)
     @cpu.x_register = 0x03
     @cpu.execute(address: @base_address)
@@ -162,6 +162,72 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xff, @cpu.y_register)
     assert_equal(false, @cpu.set?(SR_ZERO))
     assert_equal(true, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 INC $C010 ; absolute
+  # C003 BRK
+  def test_INC_absolute
+    load_memory %w[ee 10 c0 00]
+
+    @cpu.write_ram(address: 0xc010, data: 0xa0)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xa1, @cpu.read_ram(address: 0xc010))
+  end
+
+  # C000 INC $C020,X
+  # C003 BRK
+  # C004 INC $FFFF,X
+  # BRK
+  def test_INC_absolute_x
+    load_memory %w[fe 20 c0 00 fe ff ff 00]
+
+    @cpu.write_ram(address: 0xc023, data: 0xd0)
+    @cpu.x_register = 0x03
+    @cpu.execute(address: @base_address)
+    assert_equal(0xd1, @cpu.read_ram(address: 0xc023))
+
+    # test wrap-around from memory top to zero page
+    @cpu.write_ram(address: 0x0002, data: 0xe0)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xe1, @cpu.read_ram(address: 0x0002))
+  end
+
+  # C000 INC $80 ; zero page, N flag
+  # C002 BRK
+  # C003 INC $80 ; Z flag
+  # C005 BRK
+  def test_INC_zero_page
+    load_memory %w[e6 80 00 e6 80 00]
+
+    @cpu.write_ram(address: 0x0080, data: 0xfe)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xff, @cpu.read_ram(address: 0x0080))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.read_ram(address: 0x0080))
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 INC $80,X
+  # C002 BRK
+  # C003 INC $80,X
+  # C005 BRK
+  def test_INC_zero_page_x
+    load_memory %w[f6 80 00 f6 80 00]
+
+    @cpu.x_register = 0x0f
+    @cpu.write_ram(address: 0x008f, data: 0xb0)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xb1, @cpu.read_ram(address: 0x008f))
+
+    # test zero-page wrap-around
+    @cpu.x_register = 0xff
+    @cpu.write_ram(address: 0x007f, data: 0xc0)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xc1, @cpu.read_ram(address: 0x007f))
   end
 
   # C000 INX
