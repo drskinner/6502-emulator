@@ -67,11 +67,21 @@ module CpuInstructions
   # Z flag set if AC == 0; N flag set if AC bit 7 is set
   #
   def LDA(address:)
-    puts "LDA: Returning lookup at #{'%04X' % address}" if @log
     @accumulator = @ram[address]
 
     @accumulator.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
     (@accumulator & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
+
+  #
+  # Load X register with a byte value. Has many address modes.
+  # Z flag set if XR == 0; N flag set if XR bit 7 is set
+  #
+  def LDX(address:)
+    @x_register = @ram[address]
+
+    @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
   end
 
   def NOP(address:); end

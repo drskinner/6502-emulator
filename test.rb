@@ -207,7 +207,7 @@ class MyTest < Test::Unit::TestCase
   def test_LDA_absolute
     load_memory %w[ad 08 c0 00]
 
-      # $c000 = #$a9
+      # $c008 = #$a9
       @cpu.write_ram(address: 0xc008, data: 0xa9)
       @cpu.execute(address: @base_address)
       assert_equal(0xa9, @cpu.accumulator)
@@ -338,6 +338,80 @@ class MyTest < Test::Unit::TestCase
     @cpu.x_register = 0x10
     @cpu.execute(address: @base_address)
     assert_equal(0xfe, @cpu.accumulator)
+  end
+
+  # C000 LDX $C008   ; absolute
+  # C003 BRK
+  def test_LDX_absolute
+    load_memory %w[ae 08 c0 00]
+
+      # $c008 = #$a9
+      @cpu.write_ram(address: 0xc008, data: 0xa9)
+      @cpu.execute(address: @base_address)
+      assert_equal(0xa9, @cpu.x_register)
+  end
+
+  # C000 LDX $c000,y ; absolute,y
+  # C003 BRK
+  def test_LDX_absolute_y
+    load_memory %w[be 00 c0 00]
+
+    # $c010 = #$b3
+    @cpu.write_ram(address: 0xc010, data: 0xb3)
+    @cpu.y_register = 0x10
+    @cpu.execute(address: @base_address)
+    assert_equal(0xb3, @cpu.x_register)
+  end
+
+  # C000 LDX #$40    ; immediate
+  # C002 BRK
+  # C003 LDX #$00    ; test Z flag
+  # C005 BRK
+  # C006 LDX #$FF    ; test N flag
+  # C008 BRK
+  def test_LDX_immediate
+    load_memory %w[a2 40 00 a2 00 00 a2 ff 00]
+
+    # X = #$40
+    @cpu.execute(address: @base_address)
+    assert_equal(0x40, @cpu.x_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    
+    # X = #$00 ; test Z flag
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.x_register)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    # X = #$ff ; test N flag
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xFF, @cpu.x_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 LDX $80     ; zero-page
+  # C002 BRK
+  def test_LDX_zero_page
+    load_memory %w[a6 80 00]
+
+    # $0080 = #$ff
+    @cpu.write_ram(address: 0x0080, data: 0xfe)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xfe, @cpu.x_register)
+  end
+
+  # C000 LDX $70,y   ; zero-page,y
+  # C002 BRK
+  def test_LDA_zero_page_y
+    load_memory %w[b6 70 00]
+
+    # $0080 = #$fd
+    @cpu.write_ram(address: 0x0080, data: 0xfd)
+    @cpu.y_register = 0x10
+    @cpu.execute(address: @base_address)
+    assert_equal(0xfd, @cpu.x_register)
   end
 
   # C000 NOP

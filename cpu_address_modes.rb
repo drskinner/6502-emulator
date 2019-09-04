@@ -28,6 +28,13 @@ module CpuAddressModes
     (@ram[@program_counter] + @x_register) & 0x00ff
   end
 
+  # In zero_page_y, the Y register is added to the operand to get the
+  # target address. Overflows "wrap around" so we apply a zero-page mask.
+  def zero_page_y
+    @program_counter += 1
+    (@ram[@program_counter] + @y_register) & 0x00ff
+  end
+
   # In absolute mode, the operand is a little-endian 2-byte address.
   def absolute
     @program_counter += 1
