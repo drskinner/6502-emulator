@@ -265,6 +265,31 @@ class MyTest < Test::Unit::TestCase
     assert_equal(true, @cpu.set?(SR_NEGATIVE))
   end
 
+  # C000 LDA ($FE),Y
+  # C002 BRK
+  # C003 LDA ($FE),Y
+  # C005 BRK
+  #
+  # This address mode is why I write unit tests. Yeesh.
+  #
+  def test_LDA_indirect_y
+    load_memory %w[a1 fe 00 a1 fe 00]
+
+    # $00fe-$00ff points to $c0f0
+    @cpu.write_ram(address: 0x00fe, data: 0xf0)
+    @cpu.write_ram(address: 0x00ff, data: 0xc0)
+    @cpu.write_ram(address: 0xc0ff, data: 0xee)
+    @cpu.y_register = 0x0f
+    @cpu.execute(address: @base_address)
+    assert_equal(0xee, @cpu.accumulator)
+
+    # test page-crossing
+    @cpu.write_ram(address: 0xc101, data: 0xed)
+    @cpu.y_register = 0x11
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xed, @cpu.accumulator)
+  end
+
   # C000 LDA $80     ; zero-page
   # C002 BRK
   def test_LDA_zero_page

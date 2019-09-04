@@ -7,6 +7,7 @@ OPCODES = {
   0x88 => %w[DEY implied     1 2],
   0xa5 => %w[LDA zero_page   2 3],
   0xa9 => %w[LDA immediate   2 2],
+  0xa1 => %w[LDA indirect_y  2 5],
   0xad => %w[LDA absolute    3 4],
   0xb5 => %w[LDA zero_page_x 2 4],
   0xb9 => %w[LDA absolute_y  3 4],
