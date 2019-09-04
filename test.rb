@@ -32,60 +32,68 @@ class MyTest < Test::Unit::TestCase
 
   # C000 CLC
   # C001 BRK
-  # C002 SEC
-  # C003 BRK
-  def test_CLC_SEC
-    load_memory %w[18 00 38 00]
+  def test_CLC
+    load_memory %w[18 00]
 
+    @cpu.set_flag(SR_CARRY)
     @cpu.execute(address: @base_address)
     assert_equal(false, @cpu.set?(SR_CARRY))
-    @cpu.execute(address: @cpu.program_counter)
-    assert_equal(true, @cpu.set?(SR_CARRY))
-    assert_equal(0xc004, @cpu.program_counter)
   end
 
   # C000 CLD
   # C001 BRK
-  # C002 SED
-  # C003 BRK
-  def test_CLD_SED
-    load_memory %w[d8 00 f8 00]
+  def test_CLD
+    load_memory %w[d8 00]
 
+    @cpu.set_flag(SR_DECIMAL)
     @cpu.execute(address: @base_address)
     assert_equal(false, @cpu.set?(SR_DECIMAL))
-    @cpu.execute(address: @cpu.program_counter)
-    assert_equal(true, @cpu.set?(SR_DECIMAL))
-    assert_equal(0xc004, @cpu.program_counter)
   end
 
   # C000 CLI
   # C001 BRK
-  # C002 SEI
-  # C003 BRK
-  def test_CLI_SEI
-    load_memory %w[58 00 78 00]
+  def test_CLI
+    load_memory %w[58 00]
 
+    @cpu.set_flag(SR_INTERRUPT)
     @cpu.execute(address: @base_address)
     assert_equal(false, @cpu.set?(SR_INTERRUPT))
-    @cpu.execute(address: @cpu.program_counter)
-    assert_equal(true, @cpu.set?(SR_INTERRUPT))
-    assert_equal(0xc004, @cpu.program_counter)
   end
 
-  # C000 DEC $80 ; zero page
+  # C000 DEC $C010 ; absolute
+  # C003 BRK
+  def test_DEC_absolute
+    load_memory %w[ce 10 c0 00]
+
+    @cpu.write_ram(address: 0xc010, data: 0xc0)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xbf, @cpu.read_ram(address: 0xc010))
+  end
+
+  # C000 DEC $C020,X
+  # C003 BRK
+  # C004 DEC $FFFF,X
+  # BRK
+  def test_DEC_absolute_x
+    load_memory %w[de 20 c0 00 de ff ff 00]
+  
+    @cpu.write_ram(address: 0xc023, data: 0xd0)
+    @cpu.x_register = 0x03
+    @cpu.execute(address: @base_address)
+    assert_equal(0xcf, @cpu.read_ram(address: 0xc023))
+
+    # test wrap-around from memory top to zero page
+    @cpu.write_ram(address: 0x0002, data: 0xe0)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xdf, @cpu.read_ram(address: 0x0002))
+  end
+
+  # C000 DEC $80 ; zero page, Z flag
   # C002 BRK
-  # C003 DEC $80
+  # C003 DEC $80 ; N flag
   # C005 BRK
-  # C006 DEC $C003
-  # C008 BRK
-  # C009 DEC $80,X
-  # C00C BRK
-  # C00D DEC $80,X
-  # C00F BRK
-  # C010 DEC $C000,X
-  # C013 BRK
-  def test_DEC
-    load_memory %w[c6 80 00 c6 80 00 ce 03 c0 00 d6 80 00 d6 80 00 de 00 c0 00 de ff ff]
+  def test_DEC_zero_page
+    load_memory %w[c6 80 00 c6 80 00]
 
     @cpu.write_ram(address: 0x0080, data: 0x01)
     @cpu.execute(address: @base_address)
@@ -97,29 +105,31 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xff, @cpu.read_ram(address: 0x0080))
     assert_equal(false, @cpu.set?(SR_ZERO))
     assert_equal(true, @cpu.set?(SR_NEGATIVE))
+  end
 
-    @cpu.execute(address: @cpu.program_counter)
-    assert_equal(0xc5, @cpu.read_ram(address: 0xc003))
+  # C000 DEC $80,X
+  # C002 BRK
+  # C003 DEC $80,X
+  # C005 BRK
+  def test_DEC_zero_page_x
+    load_memory %w[d6 80 00 d6 80 00]
 
     @cpu.x_register = 0x0f
     @cpu.write_ram(address: 0x008f, data: 0xc0)
-    @cpu.execute(address: @cpu.program_counter)
+    @cpu.execute(address: @base_address)
     assert_equal(0xbf, @cpu.read_ram(address: 0x008f))
 
+    # test zero-page wrap-around
     @cpu.x_register = 0xff
     @cpu.write_ram(address: 0x007f, data: 0xd0)
     @cpu.execute(address: @cpu.program_counter)
     assert_equal(0xcf, @cpu.read_ram(address: 0x007f))
-
-    @cpu.x_register = 0x03
-    @cpu.execute(address: @cpu.program_counter)
-    assert_equal(0xc4, @cpu.read_ram(address: 0xc003))
-
-    @cpu.write_ram(address: 0x0002, data: 0xe0)
-    @cpu.execute(address: @cpu.program_counter)
-    assert_equal(0xdf, @cpu.read_ram(address: 0x0002))
   end
 
+  # C000 DEX
+  # C001 BRK
+  # C002 DEX
+  # C003 BRK
   def test_DEX
     load_memory %w[ca 00 ca 00]
 
@@ -192,26 +202,49 @@ class MyTest < Test::Unit::TestCase
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
   end
 
+  # C000 LDA $C008   ; absolute
+  # C003 BRK
+  def test_LDA_absolute
+    load_memory %w[ad 08 c0 00]
+
+      # $c000 = #$a9
+      @cpu.write_ram(address: 0xc008, data: 0xa9)
+      @cpu.execute(address: @base_address)
+      assert_equal(0xa9, @cpu.accumulator)
+  end
+
+  # C000 LDA $c000,x ; absolute,x
+  # C003 BRK
+  def test_LDA_absolute_x
+    load_memory %w[bd 00 c0 00]
+
+    # $c010 = #$b4
+    @cpu.write_ram(address: 0xc010, data: 0xb4)
+    @cpu.x_register = 0x10
+    @cpu.execute(address: @base_address)
+    assert_equal(0xb4, @cpu.accumulator)
+  end
+
+  # C000 LDA $c000,y ; absolute,y
+  # C003 BRK
+  def test_LDA_absoulte_y
+    load_memory %w[b9 00 c0 00]
+
+    # $c00c = #$ad
+    @cpu.write_ram(address: 0xc00c, data: 0xad)
+    @cpu.y_register = 0x0c
+    @cpu.execute(address: @base_address)
+    assert_equal(0xad, @cpu.accumulator)
+  end
+
   # C000 LDA #$40    ; immediate
   # C002 BRK
   # C003 LDA #$00    ; test Z flag
   # C005 BRK
   # C006 LDA #$FF    ; test N flag
   # C008 BRK
-  # C009 LDA $80     ; zero-page
-  # C00B BRK
-  # C00C LDA $C000   ; absolute
-  # C00F BRK
-  # C010 LDA $70,x   ; zero-page,x
-  # C012 BRK
-  # C013 LDA $c000,x ; absolute,x
-  # C016 BRK
-  # C017 LDA $c000,y ; absolute,y
-  # C01A BRK
-  def test_LDA
-    bytes =  %w[a9 40 00 a9 00 00 a9 ff 00 a5 80 00 ad 03 c0 00]
-    bytes += %w[b5 70 00 bd 00 c0 00 b9 00 c0 00]
-    load_memory(bytes)
+  def test_LDA_immediate
+    load_memory %w[a9 40 00 a9 00 00 a9 ff 00]
 
     # A = #$40
     @cpu.execute(address: @base_address)
@@ -230,29 +263,29 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xFF, @cpu.accumulator)
     assert_equal(false, @cpu.set?(SR_ZERO))
     assert_equal(true, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 LDA $80     ; zero-page
+  # C002 BRK
+  def test_LDA_zero_page
+    load_memory %w[a5 80 00]
 
     # $0080 = #$ff
     @cpu.write_ram(address: 0x0080, data: 0xff)
-    @cpu.execute(address: @cpu.program_counter)
+    @cpu.execute(address: @base_address)
     assert_equal(0xff, @cpu.accumulator)
+  end
 
-    # $c000 = #$a9
-    @cpu.execute(address: @cpu.program_counter)
-    assert_equal(0xa9, @cpu.accumulator)
+  # C000 LDA $70,x   ; zero-page,x
+  # C002 BRK
+  def test_LDA_zero_page_x
+    load_memory %w[b5 70 00]
 
-    # $0080 = #$ff
+    # $0080 = #$fe
+    @cpu.write_ram(address: 0x0080, data: 0xfe)
     @cpu.x_register = 0x10
-    @cpu.execute(address: @cpu.program_counter)
-    assert_equal(0xff, @cpu.accumulator)
-
-    # $c010 = #$b5
-    @cpu.execute(address: @cpu.program_counter)
-    assert_equal(0xb5, @cpu.accumulator)
-
-    # $c00c = #$ad
-    @cpu.y_register = 0x0c
-    @cpu.execute(address: @cpu.program_counter)
-    assert_equal(0xad, @cpu.accumulator)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xfe, @cpu.accumulator)
   end
 
   # C000 NOP
@@ -266,4 +299,33 @@ class MyTest < Test::Unit::TestCase
     assert_equal(@base_address + 0x02, @cpu.program_counter)
   end
 
+  # C000 SEC
+  # C001 BRK
+  def test_SEC
+    load_memory %w[38 00]
+
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(true, @cpu.set?(SR_CARRY))
+  end
+
+  # C000 SED
+  # C001 BRK
+  def test_SED
+    load_memory %w[f8 00]
+
+    @cpu.clear_flag(SR_DECIMAL)
+    @cpu.execute(address: @base_address)
+    assert_equal(true, @cpu.set?(SR_DECIMAL))
+  end
+
+  # C000 SEI
+  # C001 BRK
+  def test_SEI
+    load_memory %w[78 00]
+
+    @cpu.clear_flag(SR_INTERRUPT)
+    @cpu.execute(address: @base_address)
+    assert_equal(true, @cpu.set?(SR_INTERRUPT))
+  end
 end
