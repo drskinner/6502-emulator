@@ -96,7 +96,7 @@ module CpuAddressModes
   # so there will be no clock-cycle penalty for crossing a page boundary.
   #
   # "You may never need to use this mode. Indeed, most programmers lead
-  #  full, rich lives without ever writing code that uses indirect, indexed
+  #  full, rich lives without ever writing code that uses indexed, indirect
   #  addressing." -- Jim Butterfield
   def indirect_x
     @program_counter += 1

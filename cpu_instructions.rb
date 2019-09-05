@@ -118,4 +118,44 @@ module CpuInstructions
   def SEI(address:)
     set_flag(SR_INTERRUPT)
   end
+
+  def TAX(address:)
+    @x_register = @accumulator
+
+    @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
+
+  def TAY(address:)
+    @y_register = @accumulator
+
+    @y_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@y_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
+
+  def TSX(address:)
+    @x_register = @stack_pointer
+
+    @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
+
+  def TXA(address:)
+    @accumulator = @x_register
+
+    @accumulator.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@accumulator & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
+
+  # does not affect status flags
+  def TXS(address:)
+    @stack_pointer = @x_register
+  end
+
+  def TYA(address:)
+    @accumulator = @y_register
+
+    @accumulator.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@accumulator & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
 end

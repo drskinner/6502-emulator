@@ -594,4 +594,168 @@ class MyTest < Test::Unit::TestCase
     @cpu.execute(address: @base_address)
     assert_equal(true, @cpu.set?(SR_INTERRUPT))
   end
+
+  # C000 TAX
+  # C001 BRK
+  # C002 TAX
+  # C003 BRK
+  # C004 TAX
+  # C005 BRK
+  def test_TAX
+    load_memory %w[aa 00 aa 00 aa 00]
+
+    @cpu.accumulator = 0x20
+    @cpu.execute(address: @base_address)
+    assert_equal(@cpu.x_register, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    # Z flag
+    @cpu.accumulator = 0x00
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(@cpu.x_register, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    # N flag
+    @cpu.accumulator = 0x80
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(@cpu.x_register, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 TAY
+  # C001 BRK
+  # C002 TAY
+  # C003 BRK
+  # C004 TAY
+  # C005 BRK
+  def test_TAY
+    load_memory %w[a8 00 a8 00 a8 00]
+
+    @cpu.accumulator = 0x20
+    @cpu.execute(address: @base_address)
+    assert_equal(@cpu.y_register, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    # Z flag
+    @cpu.accumulator = 0x00
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(@cpu.y_register, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    # N flag
+    @cpu.accumulator = 0x80
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(@cpu.y_register, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 TSX
+  # C001 BRK
+  # C002 TSX
+  # C003 BRK
+  # C004 TSX
+  # C005 BRK
+  def test_TSX
+    load_memory %w[ba 00 ba 00 ba 00]
+
+    @cpu.stack_pointer = 0x20
+    @cpu.execute(address: @base_address)
+    assert_equal(@cpu.x_register, @cpu.stack_pointer)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    # Z flag
+    @cpu.stack_pointer = 0x00
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(@cpu.x_register, @cpu.stack_pointer)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    # N flag
+    @cpu.stack_pointer = 0x80
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(@cpu.x_register, @cpu.stack_pointer)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 TXA
+  # C001 BRK
+  # C002 TXA
+  # C003 BRK
+  # C004 TXA
+  # C005 BRK
+  def test_TXA
+    load_memory %w[8a 00 8a 00 8a 00]
+
+    @cpu.x_register = 0x21
+    @cpu.execute(address: @base_address)
+    assert_equal(@cpu.accumulator, @cpu.x_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    # Z flag
+    @cpu.x_register = 0x00
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(@cpu.accumulator, @cpu.x_register)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    # N flag
+    @cpu.x_register = 0x80
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(@cpu.accumulator, @cpu.x_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 TXS
+  # C001 BRK
+  def test_TXS
+    load_memory %w[9a 00]
+
+    @cpu.x_register = 0x22
+    @cpu.set_flag(SR_ZERO)
+    @cpu.set_flag(SR_NEGATIVE)
+    @cpu.execute(address: @base_address)
+    assert_equal(@cpu.stack_pointer, @cpu.x_register)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 TYA
+  # C001 BRK
+  # C002 TYA
+  # C003 BRK
+  # C004 TYA
+  # C005 BRK
+  def test_TYA
+    load_memory %w[98 00 98 00 98 00]
+
+    @cpu.y_register = 0x22
+    @cpu.execute(address: @base_address)
+    assert_equal(@cpu.accumulator, @cpu.y_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    # Z flag
+    @cpu.y_register = 0x00
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(@cpu.accumulator, @cpu.y_register)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    # N flag
+    @cpu.y_register = 0x80
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(@cpu.accumulator, @cpu.y_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+  end
 end
