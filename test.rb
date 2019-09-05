@@ -565,6 +565,88 @@ class MyTest < Test::Unit::TestCase
     assert_equal(@base_address + 0x02, @cpu.program_counter)
   end
 
+  # C000 PHA
+  # C001 BRK
+  # C002 PHA
+  # C003 BRK
+  def test_PHA
+    load_memory %w[48 00 48 00]
+
+    @cpu.stack_pointer = 0xff
+    @cpu.accumulator = 0xac
+    @cpu.execute(address: @base_address)
+    assert_equal(0xfe, @cpu.stack_pointer)
+    assert_equal(0xac, @cpu.read_ram(address: 0x01ff))
+
+    # test stack overflow
+    @cpu.stack_pointer = 0x00
+    @cpu.accumulator = 0xac
+    @cpu.execute(address: @base_address)
+    assert_equal(0xff, @cpu.stack_pointer)
+    assert_equal(0xac, @cpu.read_ram(address: 0x0100))
+  end
+
+  # C000 PHP
+  # C001 BRK
+  def test_PHP
+    load_memory %w[08 00]
+
+    @cpu.stack_pointer = 0xff
+    @cpu.status_register = 0xbd
+    @cpu.execute(address: @base_address)
+    assert_equal(0xfe, @cpu.stack_pointer)
+    assert_equal(0xbd, @cpu.read_ram(address: 0x01ff))
+  end
+
+  # C000 PLA
+  # C001 BRK
+  # C002 PLA
+  # C003 BRK
+  # C004 PLA
+  # C005 BRK
+  def test_PLA
+    load_memory %w[68 00 68 00 68 00]
+
+    @cpu.accumulator = 0x00
+    @cpu.stack_pointer = 0xfd
+    @cpu.write_ram(address: 0x01fe, data: 0x31)
+    @cpu.write_ram(address: 0x01ff, data: 0x80)
+    @cpu.write_ram(address: 0x0100, data: 0x00)
+
+    @cpu.execute(address: @base_address)
+    assert_equal(0xfe, @cpu.stack_pointer)
+    assert_equal(0x31, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    # N flag
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xff, @cpu.stack_pointer)
+    assert_equal(0x80, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+
+    # Z flag; overflow
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.stack_pointer)
+    assert_equal(0x00, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 PLP
+  # C001 HLT ; BRK affects status flags!
+  def test_PLP
+    load_memory %w[28 02]
+
+    @cpu.status_register = 0x00
+    @cpu.stack_pointer = 0xfe
+    @cpu.write_ram(address: 0x01ff, data: 0xee)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xff, @cpu.stack_pointer)
+    assert_equal(0xee, @cpu.status_register)
+  end
+
   # C000 SEC
   # C001 BRK
   def test_SEC

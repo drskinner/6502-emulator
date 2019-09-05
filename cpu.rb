@@ -35,6 +35,26 @@ class Cpu
     @ram[address] = data
   end
 
+  #
+  # Top-down stack. Write a byte on page 0x01 at the location indicated by
+  # @stack_pointer, and decrement the pointer. The stack pointer does not
+  # care if we overflow; 0x100 will roll over to 0x1ff.
+  #
+  def stack_push_byte(byte:)
+    write_ram(address: 0x0100 + @stack_pointer, data: byte & 0xff)
+    @stack_pointer = (@stack_pointer + 0xff) & 0xff
+  end
+
+  #
+  # Increment the stack pointer, and return the byte at that new location,
+  # which will become the next available location on the stack. The stack
+  # pointer will happily underflow; 0x1ff will roll over to 0x100.
+  #
+  def stack_pull_byte
+    @stack_pointer = (@stack_pointer + 0x01) & 0xff
+    read_ram(address: (0x0100 + @stack_pointer) & 0x01ff)
+  end
+
   def execute(address:)
     @running = true
     @program_counter = address

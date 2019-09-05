@@ -46,6 +46,14 @@ module CpuInstructions
   end
 
   #
+  # Explicitly defined as 0x02 for testing purposes. All other undefined opcodes
+  # will resolve to JAM.
+  #
+  def HLT(address:)
+    @running = false
+  end
+
+  #
   # Add 1 from memory with wrap-around.
   # We can simulate this wrapping with (byte + 0x01) & 0xff.
   #
@@ -106,6 +114,25 @@ module CpuInstructions
   end
 
   def NOP(address:); end
+
+  def PHA(address:)
+    stack_push_byte(byte: @accumulator)
+  end
+
+  def PHP(address:)
+    stack_push_byte(byte: @status_register)
+  end
+
+  def PLA(address:)
+    @accumulator = stack_pull_byte
+
+    @accumulator.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@accumulator & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
+
+  def PLP(address:)
+    @status_register = stack_pull_byte
+  end
 
   def SEC(address:)
     set_flag(SR_CARRY)

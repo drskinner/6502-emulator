@@ -2,12 +2,20 @@
 
 OPCODES = {
   0x00 => %w[BRK implied     1 7],
+  0x02 => %w[HLT implied     1 0],
+  0x08 => %w[PHP implied     1 3],
 
   0x18 => %w[CLC implied     1 2],
 
+  0x28 => %w[PLP implied     1 4],
+
   0x38 => %w[SEC implied     1 2],
 
+  0x48 => %w[PHA implied     1 3],
+
   0x58 => %w[CLI implied     1 2],
+
+  0x68 => %w[PLA implied     1 4],
 
   0x78 => %w[SEI implied     1 2],
 
