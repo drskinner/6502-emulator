@@ -713,6 +713,80 @@ class MyTest < Test::Unit::TestCase
     assert_equal(true, @cpu.set?(SR_INTERRUPT))
   end
 
+  # C000 STX $C201
+  # C003 BRK
+  def test_STX_absolute
+    load_memory %w[8e 01 c2 00]
+
+    @cpu.x_register = 0x7f
+    @cpu.write_ram(address: 0xc201, data: 0x00)
+    assert_equal(0x00, @cpu.read_ram(address: 0xc201))
+    @cpu.execute(address: @base_address)
+    assert_equal(0x7f, @cpu.read_ram(address: 0xc201))
+  end
+
+  # C000 STX $C2
+  # C002 BRK
+  def test_STX_zero_page
+    load_memory %w[86 c2 00]
+
+    @cpu.x_register = 0x7e
+    @cpu.write_ram(address: 0x00c2, data: 0x00)
+    assert_equal(0x00, @cpu.read_ram(address: 0x00c2))
+    @cpu.execute(address: @base_address)
+    assert_equal(0x7e, @cpu.read_ram(address: 0x00c2))
+  end
+
+  # C000 STX $C2,y
+  # C002 BRK
+  def test_STX_zero_page_y
+    load_memory %w[96 c2 00]
+
+    @cpu.x_register = 0x7d
+    @cpu.y_register = 0x10
+    @cpu.write_ram(address: 0x00d2, data: 0x00)
+    assert_equal(0x00, @cpu.read_ram(address: 0x00d2))
+    @cpu.execute(address: @base_address)
+    assert_equal(0x7d, @cpu.read_ram(address: 0x00d2))
+  end
+
+  # C000 STY $C201
+  # C003 BRK
+  def test_STY_absolute
+    load_memory %w[8c 01 c2 00]
+
+    @cpu.y_register = 0x7c
+    @cpu.write_ram(address: 0xc201, data: 0x00)
+    assert_equal(0x00, @cpu.read_ram(address: 0xc201))
+    @cpu.execute(address: @base_address)
+    assert_equal(0x7c, @cpu.read_ram(address: 0xc201))
+  end
+
+  # C000 STY $C2
+  # C002 BRK
+  def test_STY_zero_page
+    load_memory %w[8c c2 00]
+
+    @cpu.y_register = 0x7b
+    @cpu.write_ram(address: 0x00c2, data: 0x00)
+    assert_equal(0x00, @cpu.read_ram(address: 0x00c2))
+    @cpu.execute(address: @base_address)
+    assert_equal(0x7b, @cpu.read_ram(address: 0x00c2))
+  end
+
+  # C000 STY $C2,x
+  # C002 BRK
+  def test_STY_zero_page_x
+    load_memory %w[94 c2 00]
+
+    @cpu.x_register = 0x10
+    @cpu.y_register = 0x7a
+    @cpu.write_ram(address: 0x00d2, data: 0x00)
+    assert_equal(0x00, @cpu.read_ram(address: 0x00d2))
+    @cpu.execute(address: @base_address)
+    assert_equal(0x7a, @cpu.read_ram(address: 0x00d2))
+  end
+
   # C000 TAX
   # C001 BRK
   # C002 TAX

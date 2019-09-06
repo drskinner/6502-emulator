@@ -21,9 +21,15 @@ OPCODES = {
 
   0x78 => %w[SEI implied     1 2],
 
+  0x84 => %w[STY zero_page   2 3],
+  0x86 => %w[STX zero_page   2 3],
   0x88 => %w[DEY implied     1 2],
   0x8a => %w[TXA implied     1 2],
+  0x8c => %w[STY absolute    3 4],
+  0x8e => %w[STX absolute    3 4],
 
+  0x94 => %w[STY zero_page_x 2 3],
+  0x96 => %w[STX zero_page_y 2 4],
   0x98 => %w[TYA implied     1 2],
   0x9a => %w[TXS implied     1 2],
 
