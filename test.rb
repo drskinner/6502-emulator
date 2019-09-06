@@ -713,6 +713,105 @@ class MyTest < Test::Unit::TestCase
     assert_equal(true, @cpu.set?(SR_INTERRUPT))
   end
 
+  # C000 STA $C201
+  # C003 BRK
+  def test_STA_absolute
+    load_memory %w[8d 01 c2 00]
+
+    @cpu.accumulator = 0x6f
+    @cpu.write_ram(address: 0xc201, data: 0x00)
+    assert_equal(0x00, @cpu.read_ram(address: 0xc201))
+    @cpu.execute(address: @base_address)
+    assert_equal(0x6f, @cpu.read_ram(address: 0xc201))
+  end
+
+  # C000 STA $C201,x
+  # C003 BRK
+  def test_STA_absolute_x
+    load_memory %w[9d 01 c2 00]
+
+    @cpu.accumulator = 0x6e
+    @cpu.x_register = 0x10
+    @cpu.write_ram(address: 0xc211, data: 0x00)
+    assert_equal(0x00, @cpu.read_ram(address: 0xc211))
+    @cpu.execute(address: @base_address)
+    assert_equal(0x6e, @cpu.read_ram(address: 0xc211))
+  end
+
+  # C000 STA $C201,y
+  # C003 BRK
+  def test_STA_absolute_y
+    load_memory %w[99 01 c2 00]
+
+    @cpu.accumulator = 0x6d
+    @cpu.y_register = 0x11
+    @cpu.write_ram(address: 0xc212, data: 0x00)
+    assert_equal(0x00, @cpu.read_ram(address: 0xc212))
+    @cpu.execute(address: @base_address)
+    assert_equal(0x6d, @cpu.read_ram(address: 0xc212))
+  end
+
+  # C000 STA ($F0,X)
+  # C002 BRK
+  #
+  def test_STA_indirect_x
+    load_memory %w[81 f0 00]
+
+    # $00fe-$00ff points to $c0f1
+    @cpu.accumulator = 0x6c
+    @cpu.x_register = 0x0e
+    @cpu.write_ram(address: 0x00fe, data: 0xf1)
+    @cpu.write_ram(address: 0x00ff, data: 0xc0)
+    @cpu.write_ram(address: 0xc0f1, data: 0x00)
+    assert_equal(0x00, @cpu.read_ram(address: 0xc0f1))
+
+    @cpu.execute(address: @base_address)
+    assert_equal(0x6c, @cpu.read_ram(address: 0xc0f1))
+  end
+
+  # C000 STA ($FE),Y
+  # C002 BRK
+  #
+  def test_STA_indirect_y
+    load_memory %w[91 fe 00]
+
+    # $00fe-$00ff points to $c0f1
+    @cpu.accumulator = 0x6b
+    @cpu.y_register = 0x0f
+    @cpu.write_ram(address: 0x00fe, data: 0xf1)
+    @cpu.write_ram(address: 0x00ff, data: 0xc0)
+    @cpu.write_ram(address: 0xc100, data: 0x00)
+    assert_equal(0x00, @cpu.read_ram(address: 0xc100))
+
+    @cpu.execute(address: @base_address)
+    assert_equal(0x6b, @cpu.read_ram(address: 0xc100))
+  end
+
+  # C000 STA $C2
+  # C002 BRK
+  def test_STA_zero_page
+    load_memory %w[85 c2 00]
+
+    @cpu.accumulator = 0x6a
+    @cpu.write_ram(address: 0x00c2, data: 0x00)
+    assert_equal(0x00, @cpu.read_ram(address: 0x00c2))
+    @cpu.execute(address: @base_address)
+    assert_equal(0x6a, @cpu.read_ram(address: 0x00c2))
+  end
+
+  # C000 STA $C2,x
+  # C002 BRK
+  def test_STA_zero_page_x
+    load_memory %w[95 c2 00]
+
+    @cpu.accumulator = 0x69
+    @cpu.x_register = 0x10
+    @cpu.write_ram(address: 0x00d2, data: 0x00)
+    assert_equal(0x00, @cpu.read_ram(address: 0x00d2))
+    @cpu.execute(address: @base_address)
+    assert_equal(0x69, @cpu.read_ram(address: 0x00d2))
+  end
+
   # C000 STX $C201
   # C003 BRK
   def test_STX_absolute

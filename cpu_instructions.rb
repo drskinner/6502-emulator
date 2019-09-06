@@ -150,6 +150,10 @@ module CpuInstructions
     set_flag(SR_INTERRUPT)
   end
 
+  def STA(address:)
+    @ram[address] = @accumulator
+  end
+
   def STX(address:)
     @ram[address] = @x_register
   end
