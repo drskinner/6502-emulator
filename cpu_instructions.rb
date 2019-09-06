@@ -80,6 +80,10 @@ module CpuInstructions
     @running = false
   end
 
+  def JMP(address:)
+    @program_counter = address
+  end
+
   #
   # Load Accumulator with a byte value. Has many address modes.
   # Z flag set if AC == 0; N flag set if AC bit 7 is set

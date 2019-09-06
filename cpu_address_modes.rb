@@ -73,6 +73,25 @@ module CpuAddressModes
     (hi * 0x0100 + lo + @y_register) & 0xffff
   end
 
+  # Indirect mode is only used with the JMP instruction. The operand contains a
+  # 16-bit address which identifies the location of the low byte of another
+  # 16-bit memory address which is the effective target of the jump.
+  #
+  # NOTE: the real 6502 has a famous bug: if the low byte of the pointer is 0xff,
+  # the the high byte's location is 0x00 and not 0x100 as one would expect. For
+  # example, JMP($C0FF) will get its high byte from $C000 instead of $C100.
+  def indirect
+   @program_counter += 1
+   pointer_lo = @ram[@program_counter]
+   @program_counter += 1
+   pointer_hi = @ram[@program_counter]
+
+   effective_lo = (pointer_hi * 0x0100 + pointer_lo) & 0xffff
+   effective_hi = (pointer_hi * 0x0100 + ((pointer_lo + 1) & 0xff)) & 0xffff
+
+   (@ram[effective_hi] * 0x0100 + @ram[effective_lo]) & 0xffff
+  end
+
   # indirect_y is more correctly called "Indirect, Indexed".
   # Indirect, Indexed mode has, as its operand, a zero-page address that
   # holds the low byte of a little-endian two-byte address. To this

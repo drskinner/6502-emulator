@@ -12,10 +12,12 @@ OPCODES = {
   0x38 => %w[SEC implied     1 2],
 
   0x48 => %w[PHA implied     1 3],
+  0x4c => %w[JMP absolute    3 3],
 
   0x58 => %w[CLI implied     1 2],
 
   0x68 => %w[PLA implied     1 4],
+  0x6c => %w[JMP indirect    3 5],
 
   0x78 => %w[SEI implied     1 2],
 

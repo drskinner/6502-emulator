@@ -73,7 +73,7 @@ class Cpu
       method(instruction).call(address: method(address_mode).call)
       puts "Executing #{'%04X' % @program_counter}: #{instruction} (#{address_mode})" if @log
 
-      @program_counter += 1
+      @program_counter += 1 unless %w[HLT JMP JSR].include?(instruction)
     end
   end
 end

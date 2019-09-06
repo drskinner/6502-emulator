@@ -268,6 +268,42 @@ class MyTest < Test::Unit::TestCase
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
   end
 
+  # C000 JMP $C006
+  # C003 BRK
+  # C004 NOP
+  # C005 NOP
+  # C006 HLT
+  def test_JMP_absolute
+    load_memory %w[4c 06 c0 00 ea ea 02]
+
+    @cpu.execute(address: @base_address)
+    assert_equal(0xc006, @cpu.program_counter)
+  end
+
+  # C000 JMP ($1234)
+  # C003 BRK
+  # C004 NOP
+  # C005 HLT
+  # C006 JMP ($12FF)
+  # C009 BRK
+  # C00A NOP
+  # C00B HLT
+  def test_JMP_indirect
+    load_memory %w[6c 34 12 00 ea 02 6c ff 12 00 ea 02]
+
+    @cpu.write_ram(address: 0x1234, data: 0x05)
+    @cpu.write_ram(address: 0x1235, data: 0xc0)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xc005, @cpu.program_counter)
+
+    # test for the JMP page-boundary bug
+    @cpu.program_counter = 0xc006
+    @cpu.write_ram(address: 0x12ff, data: 0x0b)
+    @cpu.write_ram(address: 0x1200, data: 0xc0)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xc00b, @cpu.program_counter)
+  end
+
   # C000 LDA $C008   ; absolute
   # C003 BRK
   def test_LDA_absolute
