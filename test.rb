@@ -164,6 +164,124 @@ class MyTest < Test::Unit::TestCase
     assert_equal(true, @cpu.set?(SR_NEGATIVE))
   end
 
+  # C000 EOR $c080
+  # C002 BRK
+  def test_EOR_absolute
+    load_memory %w[4d 80 c0 00]
+
+    @cpu.accumulator = 0b0110_0110
+    @cpu.write_ram(address: 0xc080, data: 0b0011_1100)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0101_1010, @cpu.accumulator)
+  end
+
+  # C000 EOR $c080,x
+  # C002 BRK
+  def test_EOR_absolute_x
+    load_memory %w[5d 80 c0 00]
+
+    @cpu.accumulator = 0b0110_0110
+    @cpu.x_register = 0x10
+    @cpu.write_ram(address: 0xc090, data: 0b0011_1100)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0101_1010, @cpu.accumulator)
+  end
+
+  # C000 EOR $c080,y
+  # C002 BRK
+  def test_EOR_absolute_y
+    load_memory %w[59 80 c0 00]
+
+    @cpu.accumulator = 0b0110_0110
+    @cpu.y_register = 0x20
+    @cpu.write_ram(address: 0xc0a0, data: 0b0011_1100)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0101_1010, @cpu.accumulator)
+  end
+
+  # C000 EOR #$3C ; %0011 1100
+  # C002 BRK
+  # C003 EOR #$66 ; %0110 0110
+  # C005 BRK
+  # C006 EOR #$01
+  # C008 BRK
+  def test_EOR_immediate
+    load_memory %w[49 3c 00 49 66 00 49 01 00]
+
+    # 0110_0110 ^ 0011_1100 == 0101_1010
+    @cpu.accumulator = 0b0110_0110
+    @cpu.execute(address: @base_address)
+    assert_equal(0x5a, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.accumulator = 0b0110_0110
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.accumulator = 0b1000_0000
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x81, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 EOR ($F0,X)
+  # C002 BRK
+  def test_EOR_indirect_x
+    load_memory %w[41 f0 00]
+
+    @cpu.accumulator = 0b0110_0110
+    @cpu.x_register = 0x0e
+    # $00fe-$00ff points to $c0f0
+    @cpu.write_ram(address: 0x00fe, data: 0xf0)
+    @cpu.write_ram(address: 0x00ff, data: 0xc0)
+    @cpu.write_ram(address: 0xc0f0, data: 0b0011_1100)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0101_1010, @cpu.accumulator)
+  end
+
+  # C000 EOR ($FE),Y
+  # C002 BRK
+  #
+  def test_EOR_indirect_y
+    load_memory %w[51 fe 00]
+
+    # $00fe-$00ff points to $c0f1
+    @cpu.accumulator = 0b0110_0110
+    @cpu.y_register = 0x0f
+    @cpu.write_ram(address: 0x00fe, data: 0xf1)
+    @cpu.write_ram(address: 0x00ff, data: 0xc0)
+    @cpu.write_ram(address: 0xc100, data: 0b0011_1100)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0101_1010, @cpu.accumulator)
+  end
+
+  # C000 EOR $80
+  # C002 BRK
+  def test_EOR_zero_page
+    load_memory %w[45 80 00]
+
+    @cpu.accumulator = 0b0110_0110
+    @cpu.write_ram(address: 0x0080, data: 0b0011_1100)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0101_1010, @cpu.accumulator)
+  end
+
+  # C000 EOR $80,x
+  # C002 BRK
+  def test_EOR_zero_page_x
+    load_memory %w[55 80 00]
+
+    @cpu.accumulator = 0b0101_0110
+    @cpu.x_register = 0x10
+    @cpu.write_ram(address: 0x0090, data: 0b1010_0110)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b1111_0000, @cpu.accumulator)
+  end
+
   # C000 INC $C010 ; absolute
   # C003 BRK
   def test_INC_absolute

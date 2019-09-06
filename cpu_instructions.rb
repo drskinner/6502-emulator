@@ -45,6 +45,12 @@ module CpuInstructions
     (@y_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
   end
 
+  def EOR(address:)
+    @accumulator = @accumulator ^ @ram[address]
+    @accumulator.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (@accumulator & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+  end
+
   #
   # Explicitly defined as 0x02 for testing purposes. All other undefined opcodes
   # will resolve to JAM.

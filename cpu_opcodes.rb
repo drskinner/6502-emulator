@@ -11,10 +11,18 @@ OPCODES = {
 
   0x38 => %w[SEC implied     1 2],
 
+  0x41 => %w[EOR indirect_x  2 6],
+  0x45 => %w[EOR zero_page   2 3],
   0x48 => %w[PHA implied     1 3],
+  0x49 => %w[EOR immediate   2 2],
   0x4c => %w[JMP absolute    3 3],
+  0x4d => %w[EOR absolute    3 4],
 
+  0x51 => %w[EOR indirect_y  2 5],
+  0x55 => %w[EOR zero_page_x 2 4],
   0x58 => %w[CLI implied     1 2],
+  0x59 => %w[EOR absolute_y  3 4],
+  0x5d => %w[EOR absolute_x  3 4],
 
   0x68 => %w[PLA implied     1 4],
   0x6c => %w[JMP indirect    3 5],
