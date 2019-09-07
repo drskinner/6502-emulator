@@ -29,26 +29,22 @@ module CpuInstructions
   #
   def DEC(address:)
     @ram[address] = (@ram[address] + 0xff) & 0xff
-    @ram[address].zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@ram[address] & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@ram[address])
   end
 
   def DEX(address:)
     @x_register = (@x_register + 0xff) & 0xff
-    @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@x_register)
   end
 
   def DEY(address:)
     @y_register = (@y_register + 0xff) & 0xff
-    @y_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@y_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@y_register)
   end
 
   def EOR(address:)
     @accumulator = @accumulator ^ @ram[address]
-    @accumulator.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@accumulator & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@accumulator)
   end
 
   #
@@ -65,20 +61,17 @@ module CpuInstructions
   #
   def INC(address:)
     @ram[address] = (@ram[address] + 0x01) & 0xff
-    @ram[address].zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@ram[address] & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@ram[address])
   end
 
   def INX(address:)
     @x_register = (@x_register + 0x01) & 0xff
-    @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@x_register)
   end
 
   def INY(address:)
     @y_register = (@y_register + 0x01) & 0xff
-    @y_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@y_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@y_register)
   end
 
   def JAM(address:)
@@ -96,9 +89,7 @@ module CpuInstructions
   #
   def LDA(address:)
     @accumulator = @ram[address]
-
-    @accumulator.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@accumulator & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@accumulator)
   end
 
   #
@@ -107,9 +98,7 @@ module CpuInstructions
   #
   def LDX(address:)
     @x_register = @ram[address]
-
-    @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@x_register)
   end
 
   #
@@ -118,9 +107,7 @@ module CpuInstructions
   #
   def LDY(address:)
     @y_register = @ram[address]
-
-    @y_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@y_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@y_register)
   end
 
   def NOP(address:); end
@@ -135,9 +122,7 @@ module CpuInstructions
 
   def PLA(address:)
     @accumulator = stack_pull_byte
-
-    @accumulator.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@accumulator & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@accumulator)
   end
 
   def PLP(address:)
@@ -170,30 +155,22 @@ module CpuInstructions
 
   def TAX(address:)
     @x_register = @accumulator
-
-    @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@x_register)
   end
 
   def TAY(address:)
     @y_register = @accumulator
-
-    @y_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@y_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@y_register)
   end
 
   def TSX(address:)
     @x_register = @stack_pointer
-
-    @x_register.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@x_register & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@x_register)
   end
 
   def TXA(address:)
     @accumulator = @x_register
-
-    @accumulator.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@accumulator & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@accumulator)
   end
 
   # does not affect status flags
@@ -203,8 +180,6 @@ module CpuInstructions
 
   def TYA(address:)
     @accumulator = @y_register
-
-    @accumulator.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
-    (@accumulator & 0x80).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    ZN_flags(@accumulator)
   end
 end
