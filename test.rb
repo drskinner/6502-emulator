@@ -137,6 +137,76 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xf0, @cpu.accumulator)
   end
 
+  # C000 BIT $C07F
+  # C002 BRK
+  # C003 BIT $C07F
+  # C005 BRK
+  # C006 BIT $C07F
+  # C008 BRK
+  def test_BIT_absolute
+    load_memory %w[2c 7f c0 00 2c 7f c0 00 2c 7f c0 00]
+
+    @cpu.accumulator = 0x0f
+    @cpu.write_ram(address: 0xc07f, data: 0xf0)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x0f, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_OVERFLOW))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.accumulator = 0xff
+    @cpu.write_ram(address: 0xc07f, data: 0xf0)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xff, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_OVERFLOW))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+
+    # proof that order does not matter
+    @cpu.accumulator = 0x0f
+    @cpu.write_ram(address: 0xc07f, data: 0xf0)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x0f, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_OVERFLOW))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 BIT $7F
+  # C002 BRK
+  # C003 BIT $7F
+  # C005 BRK
+  # C006 BIT $7F
+  # C008 BRK
+  def test_BIT_zero_page
+    load_memory %w[24 7f 00 24 7f 00 24 7f 00]
+
+    @cpu.accumulator = 0x0f
+    @cpu.write_ram(address: 0x007f, data: 0xf0)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x0f, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_OVERFLOW))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.accumulator = 0xff
+    @cpu.write_ram(address: 0x007f, data: 0xf0)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xff, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_OVERFLOW))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+
+    # proof that order does not matter
+    @cpu.accumulator = 0x0f
+    @cpu.write_ram(address: 0x007f, data: 0xf0)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x0f, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_OVERFLOW))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
   # C000 BRK
   def test_BRK
     load_memory %w[00]

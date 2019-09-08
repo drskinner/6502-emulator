@@ -16,9 +16,11 @@ OPCODES = {
   0x1d => %w[ORA absolute_x  3 4],
 
   0x21 => %w[AND indirect_x  2 6],
+  0x24 => %w[BIT zero_page   2 3],
   0x25 => %w[AND zero_page   2 3],
   0x28 => %w[PLP implied     1 4],
   0x29 => %w[AND immediate   2 2],
+  0x2c => %w[BIT absolute    3 4],
   0x2d => %w[AND absolute    3 4],
 
   0x31 => %w[AND indirect_y  2 5],

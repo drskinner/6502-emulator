@@ -7,6 +7,17 @@ module CpuInstructions
   end
 
   #
+  # BIT has always seemed a little weird...
+  # Only flags are affected; not memory or AC.
+  #
+  def BIT(address:)
+    tmp = @accumulator & @ram[address]
+    tmp.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
+    (tmp & SR_NEGATIVE).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
+    (tmp & SR_OVERFLOW).zero? ? clear_flag(SR_OVERFLOW) : set_flag(SR_OVERFLOW)
+  end
+
+  #
   # Normally, BRK would trigger an interrupt request.
   # We can at least set the B status flag.
   #
