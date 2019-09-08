@@ -1,6 +1,11 @@
 require './cpu_status_flags.rb'
 
 module CpuInstructions
+  def AND(address:)
+    @accumulator = @accumulator & @ram[address]
+    ZN_flags(@accumulator)
+  end
+
   #
   # Normally, BRK would trigger an interrupt request.
   # We can at least set the B status flag.
