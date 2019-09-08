@@ -2,10 +2,18 @@
 
 OPCODES = {
   0x00 => %w[BRK implied     1 7],
+  0x01 => %w[ORA indirect_x  2 6],
   0x02 => %w[HLT implied     1 0],
+  0x05 => %w[ORA zero_page   2 3],
   0x08 => %w[PHP implied     1 3],
+  0x09 => %w[ORA immediate   2 2],
+  0x0d => %w[ORA absolute    3 4],
 
+  0x11 => %w[ORA indirect_y  2 5],
+  0x15 => %w[ORA zero_page_x 2 4],
   0x18 => %w[CLC implied     1 2],
+  0x19 => %w[ORA absolute_y  3 4],
+  0x1d => %w[ORA absolute_x  3 4],
 
   0x28 => %w[PLP implied     1 4],
 

@@ -112,6 +112,11 @@ module CpuInstructions
 
   def NOP(address:); end
 
+  def ORA(address:)
+    @accumulator = @accumulator | @ram[address]
+    ZN_flags(@accumulator)
+  end
+
   def PHA(address:)
     stack_push_byte(byte: @accumulator)
   end

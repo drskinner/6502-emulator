@@ -719,6 +719,123 @@ class MyTest < Test::Unit::TestCase
     assert_equal(@base_address + 0x02, @cpu.program_counter)
   end
 
+  # C000 ORA $c080
+  # C002 BRK
+  def test_ORA_absolute
+    load_memory %w[0d 80 c0 00]
+
+    @cpu.accumulator = 0xf0
+    @cpu.write_ram(address: 0xc080, data: 0x0f)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xff, @cpu.accumulator)
+  end
+
+  # C000 ORA $c080,x
+  # C002 BRK
+  def test_ORA_absolute_x
+    load_memory %w[1d 80 c0 00]
+
+    @cpu.accumulator = 0xf0
+    @cpu.x_register = 0x10
+    @cpu.write_ram(address: 0xc090, data: 0x0f)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xff, @cpu.accumulator)
+  end
+
+  # C000 ORA $c080,y
+  # C002 BRK
+  def test_ORA_absolute_y
+    load_memory %w[19 80 c0 00]
+
+    @cpu.accumulator = 0xf0
+    @cpu.y_register = 0x20
+    @cpu.write_ram(address: 0xc0a0, data: 0x0f)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xff, @cpu.accumulator)
+  end
+
+  # C000 ORA #$0C
+  # C002 BRK
+  # C003 ORA #$00
+  # C005 BRK
+  # C006 ORA #$80
+  # C008 BRK
+  def test_ORA_immediate
+    load_memory %w[09 0c 00 09 00 00 09 80 00]
+
+    @cpu.accumulator = 0x03
+    @cpu.execute(address: @base_address)
+    assert_equal(0x0f, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.accumulator = 0x00
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.accumulator = 0x01
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x81, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 ORA ($F0,X)
+  # C002 BRK
+  def test_ORA_indirect_x
+    load_memory %w[01 f0 00]
+
+    @cpu.accumulator = 0x0f
+    @cpu.x_register = 0x0e
+    # $00fe-$00ff points to $c0f0
+    @cpu.write_ram(address: 0x00fe, data: 0xf0)
+    @cpu.write_ram(address: 0x00ff, data: 0xc0)
+    @cpu.write_ram(address: 0xc0f0, data: 0xf0)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xff, @cpu.accumulator)
+  end
+
+  # C000 ORA ($FE),Y
+  # C002 BRK
+  #
+  def test_ORA_indirect_y
+    load_memory %w[11 fe 00]
+
+    # $00fe-$00ff points to $c0f1
+    @cpu.accumulator = 0x0f
+    @cpu.y_register = 0x0f
+    @cpu.write_ram(address: 0x00fe, data: 0xf1)
+    @cpu.write_ram(address: 0x00ff, data: 0xc0)
+    @cpu.write_ram(address: 0xc100, data: 0xf0)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xff, @cpu.accumulator)
+  end
+
+  # C000 ORA $80
+  # C002 BRK
+  def test_ORA_zero_page
+    load_memory %w[05 80 00]
+
+    @cpu.accumulator = 0x0f
+    @cpu.write_ram(address: 0x0080, data: 0xf0)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xff, @cpu.accumulator)
+  end
+
+  # C000 ORA $80,x
+  # C002 BRK
+  def test_ORA_zero_page_x
+    load_memory %w[15 80 00]
+
+    @cpu.accumulator = 0x0f
+    @cpu.x_register = 0x10
+    @cpu.write_ram(address: 0x0090, data: 0xf0)
+    @cpu.execute(address: @base_address)
+    assert_equal(0xff, @cpu.accumulator)
+  end
+
   # C000 PHA
   # C001 BRK
   # C002 PHA
