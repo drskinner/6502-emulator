@@ -7,6 +7,10 @@ module CpuAddressModes
   # We don't actually need to return an address in implied mode.
   def implied; end
 
+  # In accumulator mode, the instruction operates on AC. In this
+  # implementation, it's the same as implied mode.
+  def a_implied; end
+
   # In immediate mode, the operand is a one-byte literal value
   # so we can increment the PC (to point at the operand in memory)
   # and return the new PC as an address to be read.

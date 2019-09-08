@@ -14,6 +14,8 @@ class MyTest < Test::Unit::TestCase
   # def teardown
   # end
 
+  # add a machine reset to this method reset_and_load_memory
+  # to ensure clean tests
   def load_memory(bytes)
     bytes.each_with_index do |value, index|
       @cpu.write_ram(address: (@base_address + index) & 0xffff, data: value.to_i(16))
@@ -1113,6 +1115,105 @@ class MyTest < Test::Unit::TestCase
     @cpu.execute(address: @base_address)
     assert_equal(0xff, @cpu.stack_pointer)
     assert_equal(0xee, @cpu.status_register)
+  end
+
+  # C000 ROL $C080
+  # C001 BRK
+  def test_ROL_absolute
+    load_memory %w[2e 80 c0 00]
+
+    @cpu.write_ram(address: 0xc080, data: 0b1010_1010)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0101_0100, @cpu.read_ram(address: 0xc080))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 ROL $C080,x
+  # C001 BRK
+  def test_ROL_absolute_x
+    load_memory %w[3e 80 c0 00]
+
+    @cpu.x_register = 0x10
+    @cpu.write_ram(address: 0xc090, data: 0b1010_1010)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0101_0100, @cpu.read_ram(address: 0xc090))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 ROL A
+  # C001 BRK
+  # C002 ROL A
+  # C003 BRK
+  # C004 ROL A
+  # C005 BRK
+  def test_ROL_accumulator
+    load_memory %w[2a 00 2a 00 2a 00]
+
+    @cpu.accumulator = 0b1010_1010
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0101_0100, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0b1010_1000, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.accumulator = 0x80
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 ROL $80
+  # C001 BRK
+  # C002 ROL $80
+  # C003 BRK
+  def test_ROL_zero_page
+    load_memory %w[26 80 00 26 80 00 26 80 00]
+
+    @cpu.write_ram(address: 0x0080, data: 0b1010_1010)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0101_0100, @cpu.read_ram(address: 0x0080))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0b1010_1000, @cpu.read_ram(address: 0x0080))
+    assert_equal(false, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.write_ram(address: 0x0080, data: 0x80)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.read_ram(address: 0x0080))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 ROL $80,x
+  # C001 BRK
+  def test_ROL_zero_page_x
+    load_memory %w[36 80 00]
+
+    @cpu.x_register = 0x10
+    @cpu.write_ram(address: 0x0090, data: 0b1010_1010)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0101_0100, @cpu.read_ram(address: 0x0090))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
   end
 
   # C000 SEC
