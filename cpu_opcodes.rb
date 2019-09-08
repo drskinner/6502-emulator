@@ -81,6 +81,7 @@ OPCODES = {
   0xb4 => %w[LDY zero_page_x 2 4],
   0xb5 => %w[LDA zero_page_x 2 4],
   0xb6 => %w[LDX zero_page_y 2 4],
+  0xb8 => %w[CLV implied     1 2],
   0xb9 => %w[LDA absolute_y  3 4],
   0xba => %w[TSX implied     1 2],
   0xbc => %w[LDY absolute_x  3 4],

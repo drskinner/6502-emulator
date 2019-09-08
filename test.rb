@@ -177,6 +177,16 @@ class MyTest < Test::Unit::TestCase
     assert_equal(false, @cpu.set?(SR_INTERRUPT))
   end
 
+  # C000 CLV
+  # C001 BRK
+  def test_CLV
+    load_memory %w[B8 00]
+
+    @cpu.set_flag(SR_OVERFLOW)
+    @cpu.execute(address: @base_address)
+    assert_equal(false, @cpu.set?(SR_OVERFLOW))
+  end
+
   # C000 DEC $C010 ; absolute
   # C003 BRK
   def test_DEC_absolute

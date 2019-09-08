@@ -27,6 +27,10 @@ module CpuInstructions
     clear_flag(SR_INTERRUPT)
   end
 
+  def CLV(address:)
+    clear_flag(SR_OVERFLOW)
+  end
+
   #
   # Subtract 1 from memory with wrap-around.
   # We can simulate this wrapping with (byte + 0x100 - 0x01) & 0xff.
