@@ -22,7 +22,7 @@ class MyTest < Test::Unit::TestCase
     end
   end
 
-  # C000 AND $c080
+  # C000 AND $C080
   # C002 BRK
   def test_AND_absolute
     load_memory %w[2d 80 c0 00]
@@ -33,7 +33,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xf0, @cpu.accumulator)
   end
 
-  # C000 AND $c080,x
+  # C000 AND $C080,x
   # C002 BRK
   def test_AND_absolute_x
     load_memory %w[3d 80 c0 00]
@@ -45,7 +45,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0x0f, @cpu.accumulator)
   end
 
-  # C000 AND $c080,y
+  # C000 AND $C080,y
   # C002 BRK
   def test_AND_absolute_y
     load_memory %w[39 80 c0 00]
@@ -127,7 +127,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xf0, @cpu.accumulator)
   end
 
-  # C000 AND $80,x
+  # C000 AND $80,X
   # C002 BRK
   def test_AND_zero_page_x
     load_memory %w[35 80 00]
@@ -374,7 +374,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0b0101_1010, @cpu.accumulator)
   end
 
-  # C000 EOR $c080,x
+  # C000 EOR $c080,X
   # C002 BRK
   def test_EOR_absolute_x
     load_memory %w[5d 80 c0 00]
@@ -386,7 +386,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0b0101_1010, @cpu.accumulator)
   end
 
-  # C000 EOR $c080,y
+  # C000 EOR $c080,Y
   # C002 BRK
   def test_EOR_absolute_y
     load_memory %w[59 80 c0 00]
@@ -469,7 +469,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0b0101_1010, @cpu.accumulator)
   end
 
-  # C000 EOR $80,x
+  # C000 EOR $80,X
   # C002 BRK
   def test_EOR_zero_page_x
     load_memory %w[55 80 00]
@@ -632,7 +632,7 @@ class MyTest < Test::Unit::TestCase
       assert_equal(0xa9, @cpu.accumulator)
   end
 
-  # C000 LDA $c000,x ; absolute,x
+  # C000 LDA $c000,X ; absolute,x
   # C003 BRK
   def test_LDA_absolute_x
     load_memory %w[bd 00 c0 00]
@@ -644,7 +644,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xb4, @cpu.accumulator)
   end
 
-  # C000 LDA $c000,y ; absolute,y
+  # C000 LDA $c000,Y ; absolute,y
   # C003 BRK
   def test_LDA_absoulte_y
     load_memory %w[b9 00 c0 00]
@@ -747,7 +747,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xff, @cpu.accumulator)
   end
 
-  # C000 LDA $70,x   ; zero-page,x
+  # C000 LDA $70,X   ; zero-page,x
   # C002 BRK
   def test_LDA_zero_page_x
     load_memory %w[b5 70 00]
@@ -770,7 +770,7 @@ class MyTest < Test::Unit::TestCase
       assert_equal(0xa9, @cpu.x_register)
   end
 
-  # C000 LDX $c000,y ; absolute,y
+  # C000 LDX $c000,Y ; absolute,y
   # C003 BRK
   def test_LDX_absolute_y
     load_memory %w[be 00 c0 00]
@@ -821,7 +821,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xfc, @cpu.x_register)
   end
 
-  # C000 LDX $70,y   ; zero-page,y
+  # C000 LDX $70,Y   ; zero-page,y
   # C002 BRK
   def test_LDX_zero_page_y
     load_memory %w[b6 70 00]
@@ -844,7 +844,7 @@ class MyTest < Test::Unit::TestCase
       assert_equal(0xa8, @cpu.y_register)
   end
 
-  # C000 LDY $c000,x ; absolute,x
+  # C000 LDY $c000,X ; absolute,x
   # C003 BRK
   def test_LDY_absolute_x
     load_memory %w[bc 00 c0 00]
@@ -895,7 +895,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xfd, @cpu.y_register)
   end
 
-  # C000 LDX $70,y   ; zero-page,y
+  # C000 LDX $70,Y   ; zero-page,y
   # C002 BRK
   def test_LDY_zero_page_x
     load_memory %w[b4 70 00]
@@ -929,7 +929,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xff, @cpu.accumulator)
   end
 
-  # C000 ORA $c080,x
+  # C000 ORA $c080,X
   # C002 BRK
   def test_ORA_absolute_x
     load_memory %w[1d 80 c0 00]
@@ -941,7 +941,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xff, @cpu.accumulator)
   end
 
-  # C000 ORA $c080,y
+  # C000 ORA $c080,Y
   # C002 BRK
   def test_ORA_absolute_y
     load_memory %w[19 80 c0 00]
@@ -1118,7 +1118,7 @@ class MyTest < Test::Unit::TestCase
   end
 
   # C000 ROL $C080
-  # C001 BRK
+  # C003 BRK
   def test_ROL_absolute
     load_memory %w[2e 80 c0 00]
 
@@ -1130,8 +1130,8 @@ class MyTest < Test::Unit::TestCase
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
   end
 
-  # C000 ROL $C080,x
-  # C001 BRK
+  # C000 ROL $C080,X
+  # C003 BRK
   def test_ROL_absolute_x
     load_memory %w[3e 80 c0 00]
 
@@ -1176,9 +1176,11 @@ class MyTest < Test::Unit::TestCase
   end
 
   # C000 ROL $80
-  # C001 BRK
-  # C002 ROL $80
-  # C003 BRK
+  # C002 BRK
+  # C003 ROL $80
+  # C005 BRK
+  # C006 ROL $80
+  # C008 BRK
   def test_ROL_zero_page
     load_memory %w[26 80 00 26 80 00 26 80 00]
 
@@ -1204,8 +1206,8 @@ class MyTest < Test::Unit::TestCase
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
   end
 
-  # C000 ROL $80,x
-  # C001 BRK
+  # C000 ROL $80,X
+  # C002 BRK
   def test_ROL_zero_page_x
     load_memory %w[36 80 00]
 
@@ -1213,6 +1215,112 @@ class MyTest < Test::Unit::TestCase
     @cpu.write_ram(address: 0x0090, data: 0b1010_1010)
     @cpu.execute(address: @base_address)
     assert_equal(0b0101_0100, @cpu.read_ram(address: 0x0090))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 ROR $C080
+  # C002 BRK
+  def test_ROR_absolute
+    load_memory %w[6e 80 c0 00]
+
+    @cpu.write_ram(address: 0xc080, data: 0b0101_0101)
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0010_1010, @cpu.read_ram(address: 0xc080))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 ROR $C080,X
+  # C002 BRK
+  def test_ROR_absolute_x
+    load_memory %w[7e 80 c0 00]
+
+    @cpu.write_ram(address: 0xc090, data: 0b0101_0101)
+    @cpu.x_register = 0x10
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0010_1010, @cpu.read_ram(address: 0xc090))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 ROR A
+  # C001 BRK
+  # C002 ROR A
+  # C003 BRK
+  # C004 ROR A
+  # C005 BRK
+  def test_ROR_accumulator
+    load_memory %w[6a 00 6a 00 6a 00]
+
+    @cpu.accumulator = 0b0101_0101
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0010_1010, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0b1001_0101, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.accumulator = 0x01
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 ROR $80
+  # C002 BRK
+  # C003 ROR $80
+  # C005 BRK
+  # C006 ROR $80
+  # C008 BRK
+  def test_ROR_zero_page
+    load_memory %w[66 80 00 66 80 00 66 80 00]
+
+    @cpu.write_ram(address: 0x0080, data: 0b0101_0101)
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0010_1010, @cpu.read_ram(address: 0x0080))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0b1001_0101, @cpu.read_ram(address: 0x0080))
+    assert_equal(false, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.write_ram(address: 0x0080, data: 0x01)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.read_ram(address: 0x0080))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 ROR $80,X
+  # C002 BRK
+  def test_ROR_zero_page_x
+    load_memory %w[76 80 00]
+
+    @cpu.write_ram(address: 0x0090, data: 0b0101_0101)
+    @cpu.x_register = 0x10
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0010_1010, @cpu.read_ram(address: 0x0090))
     assert_equal(true, @cpu.set?(SR_CARRY))
     assert_equal(false, @cpu.set?(SR_ZERO))
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
@@ -1260,7 +1368,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0x6f, @cpu.read_ram(address: 0xc201))
   end
 
-  # C000 STA $C201,x
+  # C000 STA $C201,X
   # C003 BRK
   def test_STA_absolute_x
     load_memory %w[9d 01 c2 00]
@@ -1273,7 +1381,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0x6e, @cpu.read_ram(address: 0xc211))
   end
 
-  # C000 STA $C201,y
+  # C000 STA $C201,Y
   # C003 BRK
   def test_STA_absolute_y
     load_memory %w[99 01 c2 00]
@@ -1334,7 +1442,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0x6a, @cpu.read_ram(address: 0x00c2))
   end
 
-  # C000 STA $C2,x
+  # C000 STA $C2,X
   # C002 BRK
   def test_STA_zero_page_x
     load_memory %w[95 c2 00]
@@ -1371,7 +1479,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0x7e, @cpu.read_ram(address: 0x00c2))
   end
 
-  # C000 STX $C2,y
+  # C000 STX $C2,Y
   # C002 BRK
   def test_STX_zero_page_y
     load_memory %w[96 c2 00]
@@ -1408,7 +1516,7 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0x7b, @cpu.read_ram(address: 0x00c2))
   end
 
-  # C000 STY $C2,x
+  # C000 STY $C2,X
   # C002 BRK
   def test_STY_zero_page_x
     load_memory %w[94 c2 00]
