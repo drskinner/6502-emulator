@@ -155,13 +155,14 @@ module CpuInstructions
   end
 
   def ROL(address:)
+    cached_carry_bit = set?(SR_CARRY) ? 1 : 0
     if address.nil?
       (@accumulator & 0x80).zero? ? clear_flag(SR_CARRY) : set_flag(SR_CARRY)
-      @accumulator = (@accumulator << 1) & 0xff
+      @accumulator = ((@accumulator << 1) & 0xff) + cached_carry_bit
       ZN_flags(@accumulator)
     else
       (@ram[address] & 0x80).zero? ? clear_flag(SR_CARRY) : set_flag(SR_CARRY)
-      @ram[address] = (@ram[address] << 1) & 0xff
+      @ram[address] = ((@ram[address] << 1) & 0xff) + cached_carry_bit
       ZN_flags(@ram[address])
     end
   end

@@ -1153,15 +1153,16 @@ class MyTest < Test::Unit::TestCase
   def test_ROL_accumulator
     load_memory %w[2a 00 2a 00 2a 00]
 
-    @cpu.accumulator = 0b1010_1010
+    @cpu.accumulator = 0b1010_0010
+    @cpu.set_flag(SR_CARRY)
     @cpu.execute(address: @base_address)
-    assert_equal(0b0101_0100, @cpu.accumulator)
+    assert_equal(0b0100_0101, @cpu.accumulator)
     assert_equal(true, @cpu.set?(SR_CARRY))
     assert_equal(false, @cpu.set?(SR_ZERO))
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
 
     @cpu.execute(address: @cpu.program_counter)
-    assert_equal(0b1010_1000, @cpu.accumulator)
+    assert_equal(0b1000_1011, @cpu.accumulator)
     assert_equal(false, @cpu.set?(SR_CARRY))
     assert_equal(false, @cpu.set?(SR_ZERO))
     assert_equal(true, @cpu.set?(SR_NEGATIVE))
@@ -1181,15 +1182,16 @@ class MyTest < Test::Unit::TestCase
   def test_ROL_zero_page
     load_memory %w[26 80 00 26 80 00 26 80 00]
 
-    @cpu.write_ram(address: 0x0080, data: 0b1010_1010)
+    @cpu.write_ram(address: 0x0080, data: 0b1010_0010)
+    @cpu.set_flag(SR_CARRY)
     @cpu.execute(address: @base_address)
-    assert_equal(0b0101_0100, @cpu.read_ram(address: 0x0080))
+    assert_equal(0b0100_0101, @cpu.read_ram(address: 0x0080))
     assert_equal(true, @cpu.set?(SR_CARRY))
     assert_equal(false, @cpu.set?(SR_ZERO))
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
 
     @cpu.execute(address: @cpu.program_counter)
-    assert_equal(0b1010_1000, @cpu.read_ram(address: 0x0080))
+    assert_equal(0b1000_1011, @cpu.read_ram(address: 0x0080))
     assert_equal(false, @cpu.set?(SR_CARRY))
     assert_equal(false, @cpu.set?(SR_ZERO))
     assert_equal(true, @cpu.set?(SR_NEGATIVE))
