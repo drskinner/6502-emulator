@@ -14,9 +14,9 @@ class MyTest < Test::Unit::TestCase
   # def teardown
   # end
 
-  # add a machine reset to this method reset_and_load_memory
-  # to ensure clean tests
-  def load_memory(bytes)
+  # added a machine reset to this method to ensure clean tests
+  def reset_and_load_memory(bytes)
+    @cpu.reset!
     bytes.each_with_index do |value, index|
       @cpu.write_ram(address: (@base_address + index) & 0xffff, data: value.to_i(16))
     end
@@ -25,7 +25,7 @@ class MyTest < Test::Unit::TestCase
   # C000 AND $C080
   # C002 BRK
   def test_AND_absolute
-    load_memory %w[2d 80 c0 00]
+    reset_and_load_memory %w[2d 80 c0 00]
 
     @cpu.accumulator = 0xff
     @cpu.write_ram(address: 0xc080, data: 0xf0)
@@ -36,7 +36,7 @@ class MyTest < Test::Unit::TestCase
   # C000 AND $C080,x
   # C002 BRK
   def test_AND_absolute_x
-    load_memory %w[3d 80 c0 00]
+    reset_and_load_memory %w[3d 80 c0 00]
 
     @cpu.accumulator = 0xff
     @cpu.x_register = 0x10
@@ -48,7 +48,7 @@ class MyTest < Test::Unit::TestCase
   # C000 AND $C080,y
   # C002 BRK
   def test_AND_absolute_y
-    load_memory %w[39 80 c0 00]
+    reset_and_load_memory %w[39 80 c0 00]
 
     @cpu.accumulator = 0xff
     @cpu.y_register = 0x20
@@ -64,7 +64,7 @@ class MyTest < Test::Unit::TestCase
   # C006 AND #$81
   # C008 BRK
   def test_AND_immediate
-    load_memory %w[29 03 00 29 f0 00 29 81 00]
+    reset_and_load_memory %w[29 03 00 29 f0 00 29 81 00]
 
     @cpu.accumulator = 0x06
     @cpu.execute(address: @base_address)
@@ -88,7 +88,7 @@ class MyTest < Test::Unit::TestCase
   # C000 AND ($F0,X)
   # C002 BRK
   def test_AND_indirect_x
-    load_memory %w[21 f0 00]
+    reset_and_load_memory %w[21 f0 00]
 
     @cpu.accumulator = 0xff
     @cpu.x_register = 0x0e
@@ -104,7 +104,7 @@ class MyTest < Test::Unit::TestCase
   # C002 BRK
   #
   def test_AND_indirect_y
-    load_memory %w[31 fe 00]
+    reset_and_load_memory %w[31 fe 00]
 
     # $00fe-$00ff points to $c0f1
     @cpu.accumulator = 0xff
@@ -119,7 +119,7 @@ class MyTest < Test::Unit::TestCase
   # C000 AND $80
   # C002 BRK
   def test_AND_zero_page
-    load_memory %w[25 80 00]
+    reset_and_load_memory %w[25 80 00]
 
     @cpu.accumulator = 0xff
     @cpu.write_ram(address: 0x0080, data: 0xf0)
@@ -130,7 +130,7 @@ class MyTest < Test::Unit::TestCase
   # C000 AND $80,X
   # C002 BRK
   def test_AND_zero_page_x
-    load_memory %w[35 80 00]
+    reset_and_load_memory %w[35 80 00]
 
     @cpu.accumulator = 0xff
     @cpu.x_register = 0x10
@@ -146,7 +146,7 @@ class MyTest < Test::Unit::TestCase
   # C006 BIT $C07F
   # C008 BRK
   def test_BIT_absolute
-    load_memory %w[2c 7f c0 00 2c 7f c0 00 2c 7f c0 00]
+    reset_and_load_memory %w[2c 7f c0 00 2c 7f c0 00 2c 7f c0 00]
 
     @cpu.accumulator = 0x0f
     @cpu.write_ram(address: 0xc07f, data: 0xf0)
@@ -181,7 +181,7 @@ class MyTest < Test::Unit::TestCase
   # C006 BIT $7F
   # C008 BRK
   def test_BIT_zero_page
-    load_memory %w[24 7f 00 24 7f 00 24 7f 00]
+    reset_and_load_memory %w[24 7f 00 24 7f 00 24 7f 00]
 
     @cpu.accumulator = 0x0f
     @cpu.write_ram(address: 0x007f, data: 0xf0)
@@ -211,7 +211,7 @@ class MyTest < Test::Unit::TestCase
 
   # C000 BRK
   def test_BRK
-    load_memory %w[00]
+    reset_and_load_memory %w[00]
     
     @cpu.clear_flag(SR_BREAK)
     @cpu.execute(address: @base_address)
@@ -222,7 +222,7 @@ class MyTest < Test::Unit::TestCase
   # C000 CLC
   # C001 BRK
   def test_CLC
-    load_memory %w[18 00]
+    reset_and_load_memory %w[18 00]
 
     @cpu.set_flag(SR_CARRY)
     @cpu.execute(address: @base_address)
@@ -232,7 +232,7 @@ class MyTest < Test::Unit::TestCase
   # C000 CLD
   # C001 BRK
   def test_CLD
-    load_memory %w[d8 00]
+    reset_and_load_memory %w[d8 00]
 
     @cpu.set_flag(SR_DECIMAL)
     @cpu.execute(address: @base_address)
@@ -242,7 +242,7 @@ class MyTest < Test::Unit::TestCase
   # C000 CLI
   # C001 BRK
   def test_CLI
-    load_memory %w[58 00]
+    reset_and_load_memory %w[58 00]
 
     @cpu.set_flag(SR_INTERRUPT)
     @cpu.execute(address: @base_address)
@@ -252,7 +252,7 @@ class MyTest < Test::Unit::TestCase
   # C000 CLV
   # C001 BRK
   def test_CLV
-    load_memory %w[B8 00]
+    reset_and_load_memory %w[B8 00]
 
     @cpu.set_flag(SR_OVERFLOW)
     @cpu.execute(address: @base_address)
@@ -262,7 +262,7 @@ class MyTest < Test::Unit::TestCase
   # C000 DEC $C010 ; absolute
   # C003 BRK
   def test_DEC_absolute
-    load_memory %w[ce 10 c0 00]
+    reset_and_load_memory %w[ce 10 c0 00]
 
     @cpu.write_ram(address: 0xc010, data: 0xc0)
     @cpu.execute(address: @base_address)
@@ -274,7 +274,7 @@ class MyTest < Test::Unit::TestCase
   # C004 DEC $FFFF,X
   # BRK
   def test_DEC_absolute_x
-    load_memory %w[de 20 c0 00 de ff ff 00]
+    reset_and_load_memory %w[de 20 c0 00 de ff ff 00]
 
     @cpu.write_ram(address: 0xc023, data: 0xd0)
     @cpu.x_register = 0x03
@@ -292,7 +292,7 @@ class MyTest < Test::Unit::TestCase
   # C003 DEC $80 ; N flag
   # C005 BRK
   def test_DEC_zero_page
-    load_memory %w[c6 80 00 c6 80 00]
+    reset_and_load_memory %w[c6 80 00 c6 80 00]
 
     @cpu.write_ram(address: 0x0080, data: 0x01)
     @cpu.execute(address: @base_address)
@@ -311,7 +311,7 @@ class MyTest < Test::Unit::TestCase
   # C003 DEC $80,X
   # C005 BRK
   def test_DEC_zero_page_x
-    load_memory %w[d6 80 00 d6 80 00]
+    reset_and_load_memory %w[d6 80 00 d6 80 00]
 
     @cpu.x_register = 0x0f
     @cpu.write_ram(address: 0x008f, data: 0xc0)
@@ -330,7 +330,7 @@ class MyTest < Test::Unit::TestCase
   # C002 DEX
   # C003 BRK
   def test_DEX
-    load_memory %w[ca 00 ca 00]
+    reset_and_load_memory %w[ca 00 ca 00]
 
     @cpu.x_register = 0x01
     @cpu.execute(address: @base_address)
@@ -349,7 +349,7 @@ class MyTest < Test::Unit::TestCase
   # C002 DEY
   # C003 BRK
   def test_DEY
-    load_memory %w[88 00 88 00]
+    reset_and_load_memory %w[88 00 88 00]
 
     @cpu.y_register = 0x01
     @cpu.execute(address: @base_address)
@@ -366,7 +366,7 @@ class MyTest < Test::Unit::TestCase
   # C000 EOR $c080
   # C002 BRK
   def test_EOR_absolute
-    load_memory %w[4d 80 c0 00]
+    reset_and_load_memory %w[4d 80 c0 00]
 
     @cpu.accumulator = 0b0110_0110
     @cpu.write_ram(address: 0xc080, data: 0b0011_1100)
@@ -377,7 +377,7 @@ class MyTest < Test::Unit::TestCase
   # C000 EOR $c080,X
   # C002 BRK
   def test_EOR_absolute_x
-    load_memory %w[5d 80 c0 00]
+    reset_and_load_memory %w[5d 80 c0 00]
 
     @cpu.accumulator = 0b0110_0110
     @cpu.x_register = 0x10
@@ -389,7 +389,7 @@ class MyTest < Test::Unit::TestCase
   # C000 EOR $c080,Y
   # C002 BRK
   def test_EOR_absolute_y
-    load_memory %w[59 80 c0 00]
+    reset_and_load_memory %w[59 80 c0 00]
 
     @cpu.accumulator = 0b0110_0110
     @cpu.y_register = 0x20
@@ -405,7 +405,7 @@ class MyTest < Test::Unit::TestCase
   # C006 EOR #$01
   # C008 BRK
   def test_EOR_immediate
-    load_memory %w[49 3c 00 49 66 00 49 01 00]
+    reset_and_load_memory %w[49 3c 00 49 66 00 49 01 00]
 
     # 0110_0110 ^ 0011_1100 == 0101_1010
     @cpu.accumulator = 0b0110_0110
@@ -430,7 +430,7 @@ class MyTest < Test::Unit::TestCase
   # C000 EOR ($F0,X)
   # C002 BRK
   def test_EOR_indirect_x
-    load_memory %w[41 f0 00]
+    reset_and_load_memory %w[41 f0 00]
 
     @cpu.accumulator = 0b0110_0110
     @cpu.x_register = 0x0e
@@ -446,7 +446,7 @@ class MyTest < Test::Unit::TestCase
   # C002 BRK
   #
   def test_EOR_indirect_y
-    load_memory %w[51 fe 00]
+    reset_and_load_memory %w[51 fe 00]
 
     # $00fe-$00ff points to $c0f1
     @cpu.accumulator = 0b0110_0110
@@ -461,7 +461,7 @@ class MyTest < Test::Unit::TestCase
   # C000 EOR $80
   # C002 BRK
   def test_EOR_zero_page
-    load_memory %w[45 80 00]
+    reset_and_load_memory %w[45 80 00]
 
     @cpu.accumulator = 0b0110_0110
     @cpu.write_ram(address: 0x0080, data: 0b0011_1100)
@@ -472,7 +472,7 @@ class MyTest < Test::Unit::TestCase
   # C000 EOR $80,X
   # C002 BRK
   def test_EOR_zero_page_x
-    load_memory %w[55 80 00]
+    reset_and_load_memory %w[55 80 00]
 
     @cpu.accumulator = 0b0101_0110
     @cpu.x_register = 0x10
@@ -484,7 +484,7 @@ class MyTest < Test::Unit::TestCase
   # C000 INC $C010 ; absolute
   # C003 BRK
   def test_INC_absolute
-    load_memory %w[ee 10 c0 00]
+    reset_and_load_memory %w[ee 10 c0 00]
 
     @cpu.write_ram(address: 0xc010, data: 0xa0)
     @cpu.execute(address: @base_address)
@@ -496,7 +496,7 @@ class MyTest < Test::Unit::TestCase
   # C004 INC $FFFF,X
   # BRK
   def test_INC_absolute_x
-    load_memory %w[fe 20 c0 00 fe ff ff 00]
+    reset_and_load_memory %w[fe 20 c0 00 fe ff ff 00]
 
     @cpu.write_ram(address: 0xc023, data: 0xd0)
     @cpu.x_register = 0x03
@@ -514,7 +514,7 @@ class MyTest < Test::Unit::TestCase
   # C003 INC $80 ; Z flag
   # C005 BRK
   def test_INC_zero_page
-    load_memory %w[e6 80 00 e6 80 00]
+    reset_and_load_memory %w[e6 80 00 e6 80 00]
 
     @cpu.write_ram(address: 0x0080, data: 0xfe)
     @cpu.execute(address: @base_address)
@@ -533,7 +533,7 @@ class MyTest < Test::Unit::TestCase
   # C003 INC $80,X
   # C005 BRK
   def test_INC_zero_page_x
-    load_memory %w[f6 80 00 f6 80 00]
+    reset_and_load_memory %w[f6 80 00 f6 80 00]
 
     @cpu.x_register = 0x0f
     @cpu.write_ram(address: 0x008f, data: 0xb0)
@@ -552,7 +552,7 @@ class MyTest < Test::Unit::TestCase
   # C002 INX
   # C003 BRK
   def test_INX
-    load_memory %w[e8 00 e8 00]
+    reset_and_load_memory %w[e8 00 e8 00]
 
     @cpu.x_register = 0xfe
     @cpu.execute(address: @base_address)
@@ -571,7 +571,7 @@ class MyTest < Test::Unit::TestCase
   # C002 INY
   # C003 BRK
   def test_INY
-    load_memory %w[c8 00 c8 00]
+    reset_and_load_memory %w[c8 00 c8 00]
 
     @cpu.y_register = 0xfe
     @cpu.execute(address: @base_address)
@@ -591,7 +591,7 @@ class MyTest < Test::Unit::TestCase
   # C005 NOP
   # C006 HLT
   def test_JMP_absolute
-    load_memory %w[4c 06 c0 00 ea ea 02]
+    reset_and_load_memory %w[4c 06 c0 00 ea ea 02]
 
     @cpu.execute(address: @base_address)
     assert_equal(0xc006, @cpu.program_counter)
@@ -606,7 +606,7 @@ class MyTest < Test::Unit::TestCase
   # C00A NOP
   # C00B HLT
   def test_JMP_indirect
-    load_memory %w[6c 34 12 00 ea 02 6c ff 12 00 ea 02]
+    reset_and_load_memory %w[6c 34 12 00 ea 02 6c ff 12 00 ea 02]
 
     @cpu.write_ram(address: 0x1234, data: 0x05)
     @cpu.write_ram(address: 0x1235, data: 0xc0)
@@ -624,7 +624,7 @@ class MyTest < Test::Unit::TestCase
   # C000 LDA $C008   ; absolute
   # C003 BRK
   def test_LDA_absolute
-    load_memory %w[ad 08 c0 00]
+    reset_and_load_memory %w[ad 08 c0 00]
 
       # $c008 = #$a9
       @cpu.write_ram(address: 0xc008, data: 0xa9)
@@ -635,7 +635,7 @@ class MyTest < Test::Unit::TestCase
   # C000 LDA $c000,X ; absolute,x
   # C003 BRK
   def test_LDA_absolute_x
-    load_memory %w[bd 00 c0 00]
+    reset_and_load_memory %w[bd 00 c0 00]
 
     # $c010 = #$b4
     @cpu.write_ram(address: 0xc010, data: 0xb4)
@@ -647,7 +647,7 @@ class MyTest < Test::Unit::TestCase
   # C000 LDA $c000,Y ; absolute,y
   # C003 BRK
   def test_LDA_absoulte_y
-    load_memory %w[b9 00 c0 00]
+    reset_and_load_memory %w[b9 00 c0 00]
 
     # $c00c = #$ad
     @cpu.write_ram(address: 0xc00c, data: 0xad)
@@ -663,7 +663,7 @@ class MyTest < Test::Unit::TestCase
   # C006 LDA #$FF    ; test N flag
   # C008 BRK
   def test_LDA_immediate
-    load_memory %w[a9 40 00 a9 00 00 a9 ff 00]
+    reset_and_load_memory %w[a9 40 00 a9 00 00 a9 ff 00]
 
     # A = #$40
     @cpu.execute(address: @base_address)
@@ -692,7 +692,7 @@ class MyTest < Test::Unit::TestCase
   # This address mode is why I write unit tests. Yeesh.
   #
   def test_LDA_indirect_x
-    load_memory %w[a1 f0 00 a1 f0 00]
+    reset_and_load_memory %w[a1 f0 00 a1 f0 00]
 
     # $00fe-$00ff points to $c0f0
     @cpu.write_ram(address: 0x00fe, data: 0xf0)
@@ -719,7 +719,7 @@ class MyTest < Test::Unit::TestCase
   # This address mode is also why I write unit tests.
   #
   def test_LDA_indirect_y
-    load_memory %w[b1 fe 00 b1 fe 00]
+    reset_and_load_memory %w[b1 fe 00 b1 fe 00]
 
     # $00fe-$00ff points to $c0f0
     @cpu.write_ram(address: 0x00fe, data: 0xf0)
@@ -739,7 +739,7 @@ class MyTest < Test::Unit::TestCase
   # C000 LDA $80     ; zero-page
   # C002 BRK
   def test_LDA_zero_page
-    load_memory %w[a5 80 00]
+    reset_and_load_memory %w[a5 80 00]
 
     # $0080 = #$ff
     @cpu.write_ram(address: 0x0080, data: 0xff)
@@ -750,7 +750,7 @@ class MyTest < Test::Unit::TestCase
   # C000 LDA $70,X   ; zero-page,x
   # C002 BRK
   def test_LDA_zero_page_x
-    load_memory %w[b5 70 00]
+    reset_and_load_memory %w[b5 70 00]
 
     # $0080 = #$fe
     @cpu.write_ram(address: 0x0080, data: 0xfe)
@@ -762,7 +762,7 @@ class MyTest < Test::Unit::TestCase
   # C000 LDX $C008   ; absolute
   # C003 BRK
   def test_LDX_absolute
-    load_memory %w[ae 08 c0 00]
+    reset_and_load_memory %w[ae 08 c0 00]
 
       # $c008 = #$a9
       @cpu.write_ram(address: 0xc008, data: 0xa9)
@@ -773,7 +773,7 @@ class MyTest < Test::Unit::TestCase
   # C000 LDX $c000,Y ; absolute,y
   # C003 BRK
   def test_LDX_absolute_y
-    load_memory %w[be 00 c0 00]
+    reset_and_load_memory %w[be 00 c0 00]
 
     # $c010 = #$b3
     @cpu.write_ram(address: 0xc010, data: 0xb3)
@@ -789,7 +789,7 @@ class MyTest < Test::Unit::TestCase
   # C006 LDX #$FF    ; test N flag
   # C008 BRK
   def test_LDX_immediate
-    load_memory %w[a2 40 00 a2 00 00 a2 ff 00]
+    reset_and_load_memory %w[a2 40 00 a2 00 00 a2 ff 00]
 
     # X = #$40
     @cpu.execute(address: @base_address)
@@ -813,7 +813,7 @@ class MyTest < Test::Unit::TestCase
   # C000 LDX $80     ; zero-page
   # C002 BRK
   def test_LDX_zero_page
-    load_memory %w[a6 80 00]
+    reset_and_load_memory %w[a6 80 00]
 
     # $0080 = #$ff
     @cpu.write_ram(address: 0x0080, data: 0xfc)
@@ -824,7 +824,7 @@ class MyTest < Test::Unit::TestCase
   # C000 LDX $70,Y   ; zero-page,y
   # C002 BRK
   def test_LDX_zero_page_y
-    load_memory %w[b6 70 00]
+    reset_and_load_memory %w[b6 70 00]
 
     # $0080 = #$fd
     @cpu.write_ram(address: 0x0080, data: 0xfd)
@@ -836,7 +836,7 @@ class MyTest < Test::Unit::TestCase
   # C000 LDY $C008   ; absolute
   # C003 BRK
   def test_LDY_absolute
-    load_memory %w[ac 08 c0 00]
+    reset_and_load_memory %w[ac 08 c0 00]
 
       # $c008 = #$a8
       @cpu.write_ram(address: 0xc008, data: 0xa8)
@@ -847,7 +847,7 @@ class MyTest < Test::Unit::TestCase
   # C000 LDY $c000,X ; absolute,x
   # C003 BRK
   def test_LDY_absolute_x
-    load_memory %w[bc 00 c0 00]
+    reset_and_load_memory %w[bc 00 c0 00]
 
     # $c010 = #$b2
     @cpu.write_ram(address: 0xc010, data: 0xb2)
@@ -863,7 +863,7 @@ class MyTest < Test::Unit::TestCase
   # C006 LDY #$FF    ; test N flag
   # C008 BRK
   def test_LDY_immediate
-    load_memory %w[a0 40 00 a0 00 00 a0 ff 00]
+    reset_and_load_memory %w[a0 40 00 a0 00 00 a0 ff 00]
 
     # X = #$40
     @cpu.execute(address: @base_address)
@@ -887,7 +887,7 @@ class MyTest < Test::Unit::TestCase
   # C000 LDY $80     ; zero-page
   # C002 BRK
   def test_LDY_zero_page
-    load_memory %w[a4 80 00]
+    reset_and_load_memory %w[a4 80 00]
 
     # $0080 = #$fd
     @cpu.write_ram(address: 0x0080, data: 0xfd)
@@ -898,7 +898,7 @@ class MyTest < Test::Unit::TestCase
   # C000 LDX $70,Y   ; zero-page,y
   # C002 BRK
   def test_LDY_zero_page_x
-    load_memory %w[b4 70 00]
+    reset_and_load_memory %w[b4 70 00]
 
     # $0080 = #$fa
     @cpu.write_ram(address: 0x0080, data: 0xfa)
@@ -910,7 +910,7 @@ class MyTest < Test::Unit::TestCase
   # C000 NOP
   # C001 BRK
   def test_NOP
-    load_memory %w[ea 00]
+    reset_and_load_memory %w[ea 00]
     
     @cpu.clear_flag(SR_BREAK)
     @cpu.execute(address: @base_address)
@@ -921,7 +921,7 @@ class MyTest < Test::Unit::TestCase
   # C000 ORA $c080
   # C002 BRK
   def test_ORA_absolute
-    load_memory %w[0d 80 c0 00]
+    reset_and_load_memory %w[0d 80 c0 00]
 
     @cpu.accumulator = 0xf0
     @cpu.write_ram(address: 0xc080, data: 0x0f)
@@ -932,7 +932,7 @@ class MyTest < Test::Unit::TestCase
   # C000 ORA $c080,X
   # C002 BRK
   def test_ORA_absolute_x
-    load_memory %w[1d 80 c0 00]
+    reset_and_load_memory %w[1d 80 c0 00]
 
     @cpu.accumulator = 0xf0
     @cpu.x_register = 0x10
@@ -944,7 +944,7 @@ class MyTest < Test::Unit::TestCase
   # C000 ORA $c080,Y
   # C002 BRK
   def test_ORA_absolute_y
-    load_memory %w[19 80 c0 00]
+    reset_and_load_memory %w[19 80 c0 00]
 
     @cpu.accumulator = 0xf0
     @cpu.y_register = 0x20
@@ -960,7 +960,7 @@ class MyTest < Test::Unit::TestCase
   # C006 ORA #$80
   # C008 BRK
   def test_ORA_immediate
-    load_memory %w[09 0c 00 09 00 00 09 80 00]
+    reset_and_load_memory %w[09 0c 00 09 00 00 09 80 00]
 
     @cpu.accumulator = 0x03
     @cpu.execute(address: @base_address)
@@ -984,7 +984,7 @@ class MyTest < Test::Unit::TestCase
   # C000 ORA ($F0,X)
   # C002 BRK
   def test_ORA_indirect_x
-    load_memory %w[01 f0 00]
+    reset_and_load_memory %w[01 f0 00]
 
     @cpu.accumulator = 0x0f
     @cpu.x_register = 0x0e
@@ -1000,7 +1000,7 @@ class MyTest < Test::Unit::TestCase
   # C002 BRK
   #
   def test_ORA_indirect_y
-    load_memory %w[11 fe 00]
+    reset_and_load_memory %w[11 fe 00]
 
     # $00fe-$00ff points to $c0f1
     @cpu.accumulator = 0x0f
@@ -1015,7 +1015,7 @@ class MyTest < Test::Unit::TestCase
   # C000 ORA $80
   # C002 BRK
   def test_ORA_zero_page
-    load_memory %w[05 80 00]
+    reset_and_load_memory %w[05 80 00]
 
     @cpu.accumulator = 0x0f
     @cpu.write_ram(address: 0x0080, data: 0xf0)
@@ -1026,7 +1026,7 @@ class MyTest < Test::Unit::TestCase
   # C000 ORA $80,x
   # C002 BRK
   def test_ORA_zero_page_x
-    load_memory %w[15 80 00]
+    reset_and_load_memory %w[15 80 00]
 
     @cpu.accumulator = 0x0f
     @cpu.x_register = 0x10
@@ -1040,7 +1040,7 @@ class MyTest < Test::Unit::TestCase
   # C002 PHA
   # C003 BRK
   def test_PHA
-    load_memory %w[48 00 48 00]
+    reset_and_load_memory %w[48 00 48 00]
 
     @cpu.stack_pointer = 0xff
     @cpu.accumulator = 0xac
@@ -1059,7 +1059,7 @@ class MyTest < Test::Unit::TestCase
   # C000 PHP
   # C001 BRK
   def test_PHP
-    load_memory %w[08 00]
+    reset_and_load_memory %w[08 00]
 
     @cpu.stack_pointer = 0xff
     @cpu.status_register = 0xbd
@@ -1075,7 +1075,7 @@ class MyTest < Test::Unit::TestCase
   # C004 PLA
   # C005 BRK
   def test_PLA
-    load_memory %w[68 00 68 00 68 00]
+    reset_and_load_memory %w[68 00 68 00 68 00]
 
     @cpu.accumulator = 0x00
     @cpu.stack_pointer = 0xfd
@@ -1107,7 +1107,7 @@ class MyTest < Test::Unit::TestCase
   # C000 PLP
   # C001 HLT ; BRK affects status flags!
   def test_PLP
-    load_memory %w[28 02]
+    reset_and_load_memory %w[28 02]
 
     @cpu.status_register = 0x00
     @cpu.stack_pointer = 0xfe
@@ -1120,7 +1120,7 @@ class MyTest < Test::Unit::TestCase
   # C000 ROL $C080
   # C003 BRK
   def test_ROL_absolute
-    load_memory %w[2e 80 c0 00]
+    reset_and_load_memory %w[2e 80 c0 00]
 
     @cpu.write_ram(address: 0xc080, data: 0b1010_1010)
     @cpu.execute(address: @base_address)
@@ -1133,7 +1133,7 @@ class MyTest < Test::Unit::TestCase
   # C000 ROL $C080,X
   # C003 BRK
   def test_ROL_absolute_x
-    load_memory %w[3e 80 c0 00]
+    reset_and_load_memory %w[3e 80 c0 00]
 
     @cpu.x_register = 0x10
     @cpu.write_ram(address: 0xc090, data: 0b1010_1010)
@@ -1151,7 +1151,7 @@ class MyTest < Test::Unit::TestCase
   # C004 ROL A
   # C005 BRK
   def test_ROL_accumulator
-    load_memory %w[2a 00 2a 00 2a 00]
+    reset_and_load_memory %w[2a 00 2a 00 2a 00]
 
     @cpu.accumulator = 0b1010_0010
     @cpu.set_flag(SR_CARRY)
@@ -1182,7 +1182,7 @@ class MyTest < Test::Unit::TestCase
   # C006 ROL $80
   # C008 BRK
   def test_ROL_zero_page
-    load_memory %w[26 80 00 26 80 00 26 80 00]
+    reset_and_load_memory %w[26 80 00 26 80 00 26 80 00]
 
     @cpu.write_ram(address: 0x0080, data: 0b1010_0010)
     @cpu.set_flag(SR_CARRY)
@@ -1209,7 +1209,7 @@ class MyTest < Test::Unit::TestCase
   # C000 ROL $80,X
   # C002 BRK
   def test_ROL_zero_page_x
-    load_memory %w[36 80 00]
+    reset_and_load_memory %w[36 80 00]
 
     @cpu.x_register = 0x10
     @cpu.write_ram(address: 0x0090, data: 0b1010_1010)
@@ -1223,7 +1223,7 @@ class MyTest < Test::Unit::TestCase
   # C000 ROR $C080
   # C002 BRK
   def test_ROR_absolute
-    load_memory %w[6e 80 c0 00]
+    reset_and_load_memory %w[6e 80 c0 00]
 
     @cpu.write_ram(address: 0xc080, data: 0b0101_0101)
     @cpu.clear_flag(SR_CARRY)
@@ -1237,7 +1237,7 @@ class MyTest < Test::Unit::TestCase
   # C000 ROR $C080,X
   # C002 BRK
   def test_ROR_absolute_x
-    load_memory %w[7e 80 c0 00]
+    reset_and_load_memory %w[7e 80 c0 00]
 
     @cpu.write_ram(address: 0xc090, data: 0b0101_0101)
     @cpu.x_register = 0x10
@@ -1256,7 +1256,7 @@ class MyTest < Test::Unit::TestCase
   # C004 ROR A
   # C005 BRK
   def test_ROR_accumulator
-    load_memory %w[6a 00 6a 00 6a 00]
+    reset_and_load_memory %w[6a 00 6a 00 6a 00]
 
     @cpu.accumulator = 0b0101_0101
     @cpu.clear_flag(SR_CARRY)
@@ -1287,7 +1287,7 @@ class MyTest < Test::Unit::TestCase
   # C006 ROR $80
   # C008 BRK
   def test_ROR_zero_page
-    load_memory %w[66 80 00 66 80 00 66 80 00]
+    reset_and_load_memory %w[66 80 00 66 80 00 66 80 00]
 
     @cpu.write_ram(address: 0x0080, data: 0b0101_0101)
     @cpu.clear_flag(SR_CARRY)
@@ -1314,7 +1314,7 @@ class MyTest < Test::Unit::TestCase
   # C000 ROR $80,X
   # C002 BRK
   def test_ROR_zero_page_x
-    load_memory %w[76 80 00]
+    reset_and_load_memory %w[76 80 00]
 
     @cpu.write_ram(address: 0x0090, data: 0b0101_0101)
     @cpu.x_register = 0x10
@@ -1329,7 +1329,7 @@ class MyTest < Test::Unit::TestCase
   # C000 SEC
   # C001 BRK
   def test_SEC
-    load_memory %w[38 00]
+    reset_and_load_memory %w[38 00]
 
     @cpu.clear_flag(SR_CARRY)
     @cpu.execute(address: @base_address)
@@ -1339,7 +1339,7 @@ class MyTest < Test::Unit::TestCase
   # C000 SED
   # C001 BRK
   def test_SED
-    load_memory %w[f8 00]
+    reset_and_load_memory %w[f8 00]
 
     @cpu.clear_flag(SR_DECIMAL)
     @cpu.execute(address: @base_address)
@@ -1349,7 +1349,7 @@ class MyTest < Test::Unit::TestCase
   # C000 SEI
   # C001 BRK
   def test_SEI
-    load_memory %w[78 00]
+    reset_and_load_memory %w[78 00]
 
     @cpu.clear_flag(SR_INTERRUPT)
     @cpu.execute(address: @base_address)
@@ -1359,7 +1359,7 @@ class MyTest < Test::Unit::TestCase
   # C000 STA $C201
   # C003 BRK
   def test_STA_absolute
-    load_memory %w[8d 01 c2 00]
+    reset_and_load_memory %w[8d 01 c2 00]
 
     @cpu.accumulator = 0x6f
     @cpu.write_ram(address: 0xc201, data: 0x00)
@@ -1371,7 +1371,7 @@ class MyTest < Test::Unit::TestCase
   # C000 STA $C201,X
   # C003 BRK
   def test_STA_absolute_x
-    load_memory %w[9d 01 c2 00]
+    reset_and_load_memory %w[9d 01 c2 00]
 
     @cpu.accumulator = 0x6e
     @cpu.x_register = 0x10
@@ -1384,7 +1384,7 @@ class MyTest < Test::Unit::TestCase
   # C000 STA $C201,Y
   # C003 BRK
   def test_STA_absolute_y
-    load_memory %w[99 01 c2 00]
+    reset_and_load_memory %w[99 01 c2 00]
 
     @cpu.accumulator = 0x6d
     @cpu.y_register = 0x11
@@ -1398,7 +1398,7 @@ class MyTest < Test::Unit::TestCase
   # C002 BRK
   #
   def test_STA_indirect_x
-    load_memory %w[81 f0 00]
+    reset_and_load_memory %w[81 f0 00]
 
     # $00fe-$00ff points to $c0f1
     @cpu.accumulator = 0x6c
@@ -1416,7 +1416,7 @@ class MyTest < Test::Unit::TestCase
   # C002 BRK
   #
   def test_STA_indirect_y
-    load_memory %w[91 fe 00]
+    reset_and_load_memory %w[91 fe 00]
 
     # $00fe-$00ff points to $c0f1
     @cpu.accumulator = 0x6b
@@ -1433,7 +1433,7 @@ class MyTest < Test::Unit::TestCase
   # C000 STA $C2
   # C002 BRK
   def test_STA_zero_page
-    load_memory %w[85 c2 00]
+    reset_and_load_memory %w[85 c2 00]
 
     @cpu.accumulator = 0x6a
     @cpu.write_ram(address: 0x00c2, data: 0x00)
@@ -1445,7 +1445,7 @@ class MyTest < Test::Unit::TestCase
   # C000 STA $C2,X
   # C002 BRK
   def test_STA_zero_page_x
-    load_memory %w[95 c2 00]
+    reset_and_load_memory %w[95 c2 00]
 
     @cpu.accumulator = 0x69
     @cpu.x_register = 0x10
@@ -1458,7 +1458,7 @@ class MyTest < Test::Unit::TestCase
   # C000 STX $C201
   # C003 BRK
   def test_STX_absolute
-    load_memory %w[8e 01 c2 00]
+    reset_and_load_memory %w[8e 01 c2 00]
 
     @cpu.x_register = 0x7f
     @cpu.write_ram(address: 0xc201, data: 0x00)
@@ -1470,7 +1470,7 @@ class MyTest < Test::Unit::TestCase
   # C000 STX $C2
   # C002 BRK
   def test_STX_zero_page
-    load_memory %w[86 c2 00]
+    reset_and_load_memory %w[86 c2 00]
 
     @cpu.x_register = 0x7e
     @cpu.write_ram(address: 0x00c2, data: 0x00)
@@ -1482,7 +1482,7 @@ class MyTest < Test::Unit::TestCase
   # C000 STX $C2,Y
   # C002 BRK
   def test_STX_zero_page_y
-    load_memory %w[96 c2 00]
+    reset_and_load_memory %w[96 c2 00]
 
     @cpu.x_register = 0x7d
     @cpu.y_register = 0x10
@@ -1495,7 +1495,7 @@ class MyTest < Test::Unit::TestCase
   # C000 STY $C201
   # C003 BRK
   def test_STY_absolute
-    load_memory %w[8c 01 c2 00]
+    reset_and_load_memory %w[8c 01 c2 00]
 
     @cpu.y_register = 0x7c
     @cpu.write_ram(address: 0xc201, data: 0x00)
@@ -1507,7 +1507,7 @@ class MyTest < Test::Unit::TestCase
   # C000 STY $C2
   # C002 BRK
   def test_STY_zero_page
-    load_memory %w[8c c2 00]
+    reset_and_load_memory %w[8c c2 00]
 
     @cpu.y_register = 0x7b
     @cpu.write_ram(address: 0x00c2, data: 0x00)
@@ -1519,7 +1519,7 @@ class MyTest < Test::Unit::TestCase
   # C000 STY $C2,X
   # C002 BRK
   def test_STY_zero_page_x
-    load_memory %w[94 c2 00]
+    reset_and_load_memory %w[94 c2 00]
 
     @cpu.x_register = 0x10
     @cpu.y_register = 0x7a
@@ -1536,7 +1536,7 @@ class MyTest < Test::Unit::TestCase
   # C004 TAX
   # C005 BRK
   def test_TAX
-    load_memory %w[aa 00 aa 00 aa 00]
+    reset_and_load_memory %w[aa 00 aa 00 aa 00]
 
     @cpu.accumulator = 0x20
     @cpu.execute(address: @base_address)
@@ -1566,7 +1566,7 @@ class MyTest < Test::Unit::TestCase
   # C004 TAY
   # C005 BRK
   def test_TAY
-    load_memory %w[a8 00 a8 00 a8 00]
+    reset_and_load_memory %w[a8 00 a8 00 a8 00]
 
     @cpu.accumulator = 0x20
     @cpu.execute(address: @base_address)
@@ -1596,7 +1596,7 @@ class MyTest < Test::Unit::TestCase
   # C004 TSX
   # C005 BRK
   def test_TSX
-    load_memory %w[ba 00 ba 00 ba 00]
+    reset_and_load_memory %w[ba 00 ba 00 ba 00]
 
     @cpu.stack_pointer = 0x20
     @cpu.execute(address: @base_address)
@@ -1626,7 +1626,7 @@ class MyTest < Test::Unit::TestCase
   # C004 TXA
   # C005 BRK
   def test_TXA
-    load_memory %w[8a 00 8a 00 8a 00]
+    reset_and_load_memory %w[8a 00 8a 00 8a 00]
 
     @cpu.x_register = 0x21
     @cpu.execute(address: @base_address)
@@ -1652,7 +1652,7 @@ class MyTest < Test::Unit::TestCase
   # C000 TXS
   # C001 BRK
   def test_TXS
-    load_memory %w[9a 00]
+    reset_and_load_memory %w[9a 00]
 
     @cpu.x_register = 0x22
     @cpu.set_flag(SR_ZERO)
@@ -1670,7 +1670,7 @@ class MyTest < Test::Unit::TestCase
   # C004 TYA
   # C005 BRK
   def test_TYA
-    load_memory %w[98 00 98 00 98 00]
+    reset_and_load_memory %w[98 00 98 00 98 00]
 
     @cpu.y_register = 0x22
     @cpu.execute(address: @base_address)

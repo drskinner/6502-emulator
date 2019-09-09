@@ -11,18 +11,21 @@ class Cpu
   include CpuInstructions
 
   def initialize(log = false)
+    @ram = Array.new(65536)
+    reset!
+
+    @log = log
+    @running = false
+  end
+
+  def reset!
     @accumulator     = 0x00
     @x_register      = 0x00
     @y_register      = 0x00
     @status_register = 0x00
     @stack_pointer   = 0xff
     @program_counter = 0x0000
-
-    # Someday, we'll get on the bus...
-    @ram = Array.new(65536).fill(0x00)
-
-    @log = log
-    @running = false
+    @ram.fill(0x00)
   end
 
   def read_ram(address:)
