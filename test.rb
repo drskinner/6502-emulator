@@ -139,6 +139,107 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xf0, @cpu.accumulator)
   end
 
+  # C000 ASL $C080
+  # C003 BRK
+  def test_ASL_absolute
+    reset_and_load_memory %w[0e 80 c0 00]
+
+    @cpu.write_ram(address: 0xc080, data: 0b1010_0010)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0100_0100, @cpu.read_ram(address: 0xc080))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 ASL $C080,X
+  # C003 BRK
+  def test_ASL_absolute_x
+    reset_and_load_memory %w[1e 80 c0 00]
+
+    @cpu.write_ram(address: 0xc090, data: 0b1010_0010)
+    @cpu.x_register = 0x10
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0100_0100, @cpu.read_ram(address: 0xc090))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 ASL A
+  # C001 BRK
+  # C002 ASL A
+  # C003 BRK
+  # C004 ASL A
+  # C005 BRK
+  def test_ASL_accumulator
+    reset_and_load_memory %w[0a 00 0a 00 0a 00]
+
+    @cpu.accumulator = 0b1010_0010
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0100_0100, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0b1000_1000, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.accumulator = 0x80
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 ASL $80
+  # C002 BRK
+  # C003 ASL $80
+  # C005 BRK
+  # C006 ASL $80
+  # C008 BRK
+  def test_ASL_zero_page
+    reset_and_load_memory %w[06 80 00 06 80 00 06 80 00]
+
+    @cpu.write_ram(address: 0x0080, data: 0b1010_0010)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0100_0100, @cpu.read_ram(address: 0x80))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0b1000_1000, @cpu.read_ram(address: 0x80))
+    assert_equal(false, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.write_ram(address: 0x80, data: 0x80)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.read_ram(address: 0x80))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 ASL $80,X
+  # C002 BRK
+  def test_ASL_zero_page_x
+    reset_and_load_memory %w[16 80 00]
+
+    @cpu.write_ram(address: 0x0090, data: 0b1010_0010)
+    @cpu.x_register = 0x10
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0100_0100, @cpu.read_ram(address: 0x90))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
   # C000 BIT $C07F
   # C002 BRK
   # C003 BIT $C07F

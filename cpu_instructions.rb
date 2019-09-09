@@ -6,6 +6,18 @@ module CpuInstructions
     ZN_flags(@accumulator)
   end
 
+  def ASL(address:)
+    if address.nil?
+      (@accumulator & 0x80).zero? ? clear_flag(SR_CARRY) : set_flag(SR_CARRY)
+      @accumulator = (@accumulator << 1) & 0xff
+      ZN_flags(@accumulator)
+    else
+      (@ram[address] & 0x80).zero? ? clear_flag(SR_CARRY) : set_flag(SR_CARRY)
+      @ram[address] = (@ram[address] << 1) & 0xff
+      ZN_flags(@ram[address])
+    end
+  end
+
   #
   # BIT has always seemed a little weird...
   # Only flags are affected; not memory or AC.
