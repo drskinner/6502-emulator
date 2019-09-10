@@ -1008,6 +1008,112 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xfa, @cpu.y_register)
   end
 
+  # C000 LSR $C080
+  # C003 BRK
+  def test_LSR_absolute
+    reset_and_load_memory %w[4e 80 c0 00]
+
+    @cpu.write_ram(address: 0xc080, data: 0b0101_1101)
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0010_1110, @cpu.read_ram(address: 0xc080))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 LSR $C080,X
+  # C003 BRK
+  def test_LSR_absolute_x
+    reset_and_load_memory %w[5e 80 c0 00]
+
+    @cpu.write_ram(address: 0xc090, data: 0b0101_1101)
+    @cpu.x_register = 0x10
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0010_1110, @cpu.read_ram(address: 0xc090))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 LSR A
+  # C001 BRK
+  # C002 LSR A
+  # C003 BRK
+  # C004 LSR A
+  # C005 BRK
+  def test_LSR_accumulator
+    reset_and_load_memory %w[4a 00 4a 00 4a 00]
+
+    @cpu.accumulator = 0b1011_1010
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0101_1101, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0b0010_1110, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.accumulator = 0x01
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 LSR $80
+  # C002 BRK
+  # C003 LSR $80
+  # C005 BRK
+  # C006 LSR $80
+  # C008 BRK
+  def test_LSR_zero_page
+    reset_and_load_memory %w[46 80 00 46 80 00 46 80 00]
+
+    @cpu.write_ram(address: 0x0080, data: 0b1011_1010)
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0101_1101, @cpu.read_ram(address: 0x0080))
+    assert_equal(false, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0b0010_1110, @cpu.read_ram(address: 0x0080))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+
+    @cpu.write_ram(address: 0x0080, data: 0x01)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x00, @cpu.read_ram(address: 0x0080))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 LSR $80,X
+  # C002 BRK
+  def test_LSR_zero_page_x
+    reset_and_load_memory %w[56 80 00]
+
+    @cpu.write_ram(address: 0x0090, data: 0b0101_1101)
+    @cpu.x_register = 0x10
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0b0010_1110, @cpu.read_ram(address: 0x0090))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
   # C000 NOP
   # C001 BRK
   def test_NOP

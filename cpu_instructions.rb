@@ -142,6 +142,18 @@ module CpuInstructions
     ZN_flags(@y_register)
   end
 
+  def LSR(address:)
+    if address.nil?
+      (@accumulator & 0x01).zero? ? clear_flag(SR_CARRY) : set_flag(SR_CARRY)
+      @accumulator = (@accumulator >> 1) & 0xff
+      ZN_flags(@accumulator)
+    else
+      (@ram[address] & 0x01).zero? ? clear_flag(SR_CARRY) : set_flag(SR_CARRY)
+      @ram[address] = (@ram[address] >> 1) & 0xff
+      ZN_flags(@ram[address])
+    end
+  end
+
   def NOP(address:); end
 
   def ORA(address:)
