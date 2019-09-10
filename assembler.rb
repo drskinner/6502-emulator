@@ -22,6 +22,53 @@ class Assembler
     (value >= 32 && value <= 127) ? value.chr : '.'
   end
 
+  def disassemble(command)
+    parts = command.split(' ')
+    return if parts[1].nil?
+
+    line_count = 0
+    @memory_pager = parts[1].to_i(16) unless parts[1].nil?
+
+    while (line_count <= 0x10)
+      instruction = OPCODES[@cpu.read_ram(address: @memory_pager)]
+      instruction = %w[??? implied 1 0] if instruction.nil?
+      operand1 = @cpu.read_ram(address: @memory_pager + 1)
+      operand2 = @cpu.read_ram(address: @memory_pager + 2)
+
+      print "> #{word(@memory_pager & 0xffff)} "
+      print "#{instruction[0]}"
+      case instruction[1]
+      when 'a_implied'
+        puts ' A'
+      when 'absolute'
+        puts " $#{byte operand2}#{byte operand1}"
+      when 'absolute_x'
+        puts " $#{byte operand2}#{byte operand1},X"
+      when 'absolute_y'
+        puts " $#{byte operand2}#{byte operand1},Y"
+      when 'immediate'
+        puts " #$#{byte operand1}"
+      when 'implied'
+        puts
+      when 'indirect'
+        puts " ($#{byte operand2}#{byte operand1})"
+      when 'indirect_x'
+        puts " ($#{byte operand1},X)"
+      when 'indirect_y'
+        puts " ($#{byte operand1}),Y"
+      when 'zero_page'
+        puts " $#{byte operand1}"
+      when 'zero_page_x'
+        puts " $#{byte operand1},X"
+      when 'zero_page_y'
+        puts " $#{byte operand1},Y"
+      end
+      @memory_pager += instruction[2].to_i
+
+      line_count += 1
+    end
+  end
+
   def go(command)
     parts = command.split(' ')
     return if parts[1].nil?
@@ -105,6 +152,8 @@ class Assembler
       command = gets.chomp
 
       case command[0]
+      when 'd'
+        disassemble(command)
       when 'g'
         go(command)
       when 'm'
