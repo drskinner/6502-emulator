@@ -1,0 +1,7 @@
+; add two little-endian 16-bit integers
+; results are placed in $24 and $25
+;
+; $1234 + $77fe = $8A32
+;
+> c000 18 a5 20 65 22 85 24 a5 21 65 23 85 25 00
+> 0020 34 12 fe 77

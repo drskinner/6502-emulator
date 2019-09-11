@@ -24,7 +24,6 @@ class Assembler
 
   def disassemble(command)
     parts = command.split(' ')
-    return if parts[1].nil?
 
     line_count = 0
     @memory_pager = parts[1].to_i(16) unless parts[1].nil?
@@ -75,6 +74,19 @@ class Assembler
 
     @cpu.execute(address: parts[1].to_i(16) & 0xffff)
     registers
+  end
+
+  def load(command)
+    parts = command.split(' ')
+    return if parts[1].nil?
+
+    File.open("./disk/#{parts[1]}", 'r') do |file|
+      file.each do |line|
+        puts line
+        write_memory(line) if line[0] == '>'
+      end
+    end
+
   end
 
   def memory(command)
@@ -156,6 +168,8 @@ class Assembler
         disassemble(command)
       when 'g'
         go(command)
+      when 'l'
+        load(command)
       when 'm'
         memory(command)
       when 'r'
