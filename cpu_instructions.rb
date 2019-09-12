@@ -1,6 +1,27 @@
 require './cpu_status_flags.rb'
 
 module CpuInstructions
+  #
+  # ADC can be very complicated, especially WRT the V flag.
+  # There's lots of material online about 1s- and 2-complements,
+  # signed 8-bit integers, and clever XORs but here, performance 
+  # isn't an issue, so I can try something a little more readable.
+  #
+  # TODO: Also, Decimal Mode is a fun complication.
+  #
+  def ADC(address:)
+    signed_a = @accumulator.chr.unpack('c').first
+    signed_m = @ram[address].chr.unpack('c').first
+    signed_sum = signed_a + signed_m
+    (signed_sum > 127 || signed_sum < -128) ? set_flag(SR_OVERFLOW) : clear_flag(SR_OVERFLOW)
+
+    sum = @accumulator + @ram[address] + (set?(SR_CARRY) ? 1 : 0)
+    set_flag(SR_CARRY) if sum > 0xff
+    @accumulator = sum & 0xff
+
+    ZN_flags(@accumulator)
+  end
+
   def AND(address:)
     @accumulator = @accumulator & @ram[address]
     ZN_flags(@accumulator)

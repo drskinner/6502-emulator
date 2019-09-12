@@ -57,14 +57,22 @@ OPCODES = {
   0x5d => %w[EOR absolute_x  3 4],
   0x5e => %w[LSR absolute_x  3 7],
 
+  0x61 => %w[ADC indirect_x  2 6],
+  0x65 => %w[ADC zero_page   2 3],
   0x66 => %w[ROR zero_page   2 5],
   0x68 => %w[PLA implied     1 4],
+  0x69 => %w[ADC immediate   2 2],
   0x6a => %w[ROR a_implied   1 2],
   0x6c => %w[JMP indirect    3 5],
+  0x6d => %w[ADC absolute    3 4],
   0x6e => %w[ROR absolute    3 6],
 
+  0x71 => %w[ADC indirect_y  2 5],
+  0x75 => %w[ADC zero_page_x 2 4],
   0x76 => %w[ROR zero_page_x 2 6],
   0x78 => %w[SEI implied     1 2],
+  0x79 => %w[ADC absolute_y  3 4],
+  0x7d => %w[ADC absolute_x   3 4],
   0x7e => %w[ROR absolute_x  3 7],
 
   0x81 => %w[STA indirect_x  2 6],
