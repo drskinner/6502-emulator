@@ -610,12 +610,12 @@ class MyTest < Test::Unit::TestCase
     assert_equal(false, @cpu.set?(SR_CARRY))
   end
 
-  # CPX $9F
-  # BRK
-  # CPX $9F
-  # BRK
-  # CPX $9F
-  # BRK
+  # c000 CPX $9F
+  # c002 BRK
+  # c003 CPX $9F
+  # c005 BRK
+  # c006 CPX $9F
+  # c008 BRK
   def test_CPX_zero_page
     reset_and_load_memory %w[e4 9f 00 e4 9f 00 e4 9f 00]
 
@@ -631,7 +631,7 @@ class MyTest < Test::Unit::TestCase
     @cpu.execute(address: @cpu.program_counter)
     assert_equal(true, @cpu.set?(SR_ZERO))
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
-    assert_equal(true, @cpu.set?(SR_CARRY))   
+    assert_equal(true, @cpu.set?(SR_CARRY))
 
     @cpu.write_ram(address: 0x009f, data: 0xff)
     @cpu.execute(address: @cpu.program_counter)
@@ -639,6 +639,94 @@ class MyTest < Test::Unit::TestCase
     assert_equal(true, @cpu.set?(SR_NEGATIVE))
     assert_equal(false, @cpu.set?(SR_CARRY))
   end
+
+  # C000 CPY $C09F
+  # C003 BRK
+  # C004 CPY $C09F
+  # C007 BRK
+  # C008 CPY $9F
+  # C00B BRK
+  def test_CPY_absolute
+    reset_and_load_memory %w[cc 9f c0 00 cc 9f c0 00 cc 9f c0 00]
+
+    @cpu.y_register = 0x80
+    @cpu.write_ram(address: 0xc09f, data: 0x7f)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x80, @cpu.y_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+
+    @cpu.write_ram(address: 0xc09f, data: 0x80)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+
+    @cpu.write_ram(address: 0xc09f, data: 0xff)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+    assert_equal(false, @cpu.set?(SR_CARRY))
+  end
+
+  # C000 CPY #$7F
+  # C002 BRK
+  # C003 CPY #$80
+  # C005 BRK
+  # C006 CPY #$FF
+  # C008 BRK
+  def test_CPY_immediate
+    reset_and_load_memory %w[c0 7f 00 c0 80 00 c0 ff 00]
+
+    @cpu.y_register = 0x80
+    @cpu.execute(address: @base_address)
+    assert_equal(0x80, @cpu.y_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))   
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+    assert_equal(false, @cpu.set?(SR_CARRY))
+  end
+
+  # c000 CPY $9F
+  # c002 BRK
+  # c003 CPY $9F
+  # c005 BRK
+  # c006 CPY $9F
+  # c008 BRK
+  def test_CPY_zero_page
+    reset_and_load_memory %w[c4 9f 00 c4 9f 00 c4 9f 00]
+
+    @cpu.y_register = 0x80
+    @cpu.write_ram(address: 0x009f, data: 0x7f)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x80, @cpu.y_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+
+    @cpu.write_ram(address: 0x009f, data: 0x80)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+
+    @cpu.write_ram(address: 0x009f, data: 0xff)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+    assert_equal(false, @cpu.set?(SR_CARRY))
+  end
+
 
   # C000 DEC $C010 ; absolute
   # C003 BRK

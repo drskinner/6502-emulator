@@ -118,9 +118,12 @@ OPCODES = {
   0xbd => %w[LDA absolute_x  3 4],
   0xbe => %w[LDX absolute_y  3 4],
 
+  0xc0 => %w[CPY immediate   2 2],
+  0xc4 => %w[CPY zero_page   2 3],
   0xc6 => %w[DEC zero_page   2 5],
   0xc8 => %w[INY implied     1 2],
   0xca => %w[DEX implied     1 2],
+  0xcc => %w[CPY absolute    3 4],
   0xce => %w[DEC absolute    3 6],
 
   0xd6 => %w[DEC zero_page_x 2 6],
