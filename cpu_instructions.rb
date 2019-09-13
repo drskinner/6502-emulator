@@ -78,6 +78,13 @@ module CpuInstructions
     clear_flag(SR_OVERFLOW)
   end
 
+  def CMP(address:)
+    diff = (accumulator + 0x100 - @ram[address]) & 0xff
+
+    accumulator >= @ram[address] ? set_flag(SR_CARRY) : clear_flag(SR_CARRY)
+    ZN_flags(diff)
+  end
+
   def CPX(address:)
     diff = (x_register + 0x100 - @ram[address]) & 0xff
 

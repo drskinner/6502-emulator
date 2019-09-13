@@ -119,15 +119,23 @@ OPCODES = {
   0xbe => %w[LDX absolute_y  3 4],
 
   0xc0 => %w[CPY immediate   2 2],
+  0xc1 => %w[CMP indirect_x  2 6],
   0xc4 => %w[CPY zero_page   2 3],
+  0xc5 => %w[CMP zero_page   2 3],
   0xc6 => %w[DEC zero_page   2 5],
   0xc8 => %w[INY implied     1 2],
+  0xc9 => %w[CMP immediate   2 2],
   0xca => %w[DEX implied     1 2],
   0xcc => %w[CPY absolute    3 4],
+  0xcd => %w[CMP absolute    3 4],
   0xce => %w[DEC absolute    3 6],
 
+  0xd1 => %w[CMP indirect_y  2 5],
+  0xd5 => %w[CMP zero_page_x 2 4],
   0xd6 => %w[DEC zero_page_x 2 6],
   0xd8 => %w[CLD implied     1 2],
+  0xd9 => %w[CMP absolute_y  3 4],
+  0xdd => %w[CMP absolute_x  3 4],
   0xde => %w[DEC absolute_x  3 7],
 
   0xe0 => %w[CPX immediate   2 2],
