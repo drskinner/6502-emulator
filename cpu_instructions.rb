@@ -16,7 +16,7 @@ module CpuInstructions
     (signed_sum > 127 || signed_sum < -128) ? set_flag(SR_OVERFLOW) : clear_flag(SR_OVERFLOW)
 
     sum = @accumulator + @ram[address] + (set?(SR_CARRY) ? 1 : 0)
-    set_flag(SR_CARRY) if sum > 0xff
+    sum > 0xff ? set_flag(SR_CARRY) : clear_flag(SR_CARRY)
     @accumulator = sum & 0xff
 
     ZN_flags(@accumulator)
@@ -53,9 +53,12 @@ module CpuInstructions
   #
   # Normally, BRK would trigger an interrupt request.
   # We can at least set the B status flag.
+  # Also, for some reason the unused flag (bit 5) gets set
+  # as a side-effect, at least on VICE's C= 128.
   #
   def BRK(address:)
     set_flag(SR_BREAK)
+    set_flag(SR_UNUSED)
     @running = false
   end
 
@@ -223,6 +226,28 @@ module CpuInstructions
       @ram[address] = ((@ram[address] >> 1) & 0xff) + (cached_carry_bit * 0x80)
       ZN_flags(@ram[address])
     end
+  end
+
+  #
+  # SBC is pretty confusing, but it turns out that you can subtract
+  # by inverting the operand and just adding, which is something you
+  # can do in conventional arithmetic.
+  #
+  # TODO: This facile approach won't work in Decimal Mode.
+  #
+  def SBC(address:)
+    operand = @ram[address] ^ 0xff
+
+    signed_a = @accumulator.chr.unpack('c').first
+    signed_m = operand.chr.unpack('c').first
+    signed_sum = signed_a + signed_m
+    (signed_sum > 127 || signed_sum < -128) ? set_flag(SR_OVERFLOW) : clear_flag(SR_OVERFLOW)
+
+    sum = @accumulator + operand + (set?(SR_CARRY) ? 1 : 0)
+    sum > 0xff ? set_flag(SR_CARRY) : clear_flag(SR_CARRY)
+    @accumulator = sum & 0xff
+
+    ZN_flags(@accumulator)
   end
 
   def SEC(address:)

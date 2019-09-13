@@ -1726,6 +1726,211 @@ class MyTest < Test::Unit::TestCase
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
   end
 
+  # C000 SBC $C0D0
+  # C003 BRK
+  def test_SBC_absolute
+    reset_and_load_memory %w[ed d0 c0 00]
+
+    @cpu.accumulator = 0x80
+    @cpu.set_flag(SR_CARRY)
+    @cpu.write_ram(address: 0xc0d0, data: 0x80)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x00, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+  end
+
+  # C000 SBC $C0D0,X
+  # C003 BRK
+  def test_SBC_absolute_x
+    reset_and_load_memory %w[fd d0 c0 00]
+
+    @cpu.accumulator = 0x80
+    @cpu.set_flag(SR_CARRY)
+    @cpu.x_register = 0x10
+    @cpu.write_ram(address: 0xc0e0, data: 0x80)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x00, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+  end
+
+  # C000 SBC $C0D0,Y
+  # C003 BRK
+  def test_SBC_absolute_y
+    reset_and_load_memory %w[f9 d0 c0 00]
+
+    @cpu.accumulator = 0x80
+    @cpu.set_flag(SR_CARRY)
+    @cpu.y_register = 0x20
+    @cpu.write_ram(address: 0xc0f0, data: 0x80)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x00, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+  end
+
+  # C000 SBC #$f0
+  # C002 BRK
+  # C003 SBC #$b0
+  # C005 BRK
+  # C006 SBC #$70
+  # C008 BRK
+  # C009 SBC #$f0
+  # C00B BRK
+  def test_SBC_immediate_carry_0
+    reset_and_load_memory %w[e9 f0 00 e9 b0 00 e9 70 00 e9 f0 00]
+
+    @cpu.accumulator = 0x50
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x5f, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_OVERFLOW))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(false, @cpu.set?(SR_CARRY))
+
+    @cpu.accumulator = 0x50
+    @cpu.set_flag(SR_CARRY)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xa0, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_OVERFLOW))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+    assert_equal(false, @cpu.set?(SR_CARRY))
+
+    @cpu.accumulator = 0x50
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xdf, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_OVERFLOW))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+    assert_equal(false, @cpu.set?(SR_CARRY))
+
+    @cpu.accumulator = 0xd0
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xdf, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_OVERFLOW))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+    assert_equal(false, @cpu.set?(SR_CARRY))
+  end
+
+  # C000 SBC #$30
+  # C002 BRK
+  # C003 SBC #$b0
+  # C005 BRK
+  # C006 SBC #$70
+  # C008 BRK
+  # C009 SBC #$30
+  # C00B BRK
+  def test_SBC_immediate_carry_1
+    reset_and_load_memory %w[e9 30 00 e9 b0 00 e9 70 00 e9 30 00]
+
+    @cpu.accumulator = 0x50
+    @cpu.set_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x20, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_OVERFLOW))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+
+    @cpu.accumulator = 0xd0
+    @cpu.set_flag(SR_CARRY)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x20, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_OVERFLOW))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+
+    @cpu.accumulator = 0xd0
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x5f, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_OVERFLOW))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+
+    @cpu.accumulator = 0xd0
+    @cpu.set_flag(SR_CARRY)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0xa0, @cpu.accumulator)
+    assert_equal(false, @cpu.set?(SR_OVERFLOW))
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+  end
+
+  # C000 SBC ($F0,X)
+  # C002 BRK
+  def test_SBC_indirect_x
+    reset_and_load_memory %w[e1 f0 00]
+
+    @cpu.accumulator = 0x80
+    @cpu.set_flag(SR_CARRY)
+    @cpu.x_register = 0x0e
+    # $00fe-$00ff points to $c0f1
+    @cpu.write_ram(address: 0x00fe, data: 0xf1)
+    @cpu.write_ram(address: 0x00ff, data: 0xc0)
+    @cpu.write_ram(address: 0xc0f1, data: 0x80)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x00, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+  end
+
+  # C000 SBC ($FE),Y
+  # C002 BRK
+  def test_SBC_indirect_y
+    reset_and_load_memory %w[f1 fe 00]
+
+    # $00fe-$00ff points to $c0f1
+    @cpu.accumulator = 0x80
+    @cpu.set_flag(SR_CARRY)
+    @cpu.y_register = 0x0f
+    @cpu.write_ram(address: 0x00fe, data: 0xf1)
+    @cpu.write_ram(address: 0x00ff, data: 0xc0)
+    @cpu.write_ram(address: 0xc100, data: 0x80)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x00, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+  end
+
+  # C000 SBC $D0
+  # C002 BRK
+  def test_SBC_zero_page
+    reset_and_load_memory %w[e5 d0 00]
+
+    @cpu.accumulator = 0x80
+    @cpu.set_flag(SR_CARRY)
+    @cpu.write_ram(address: 0x00d0, data: 0x80)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x00, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+  end
+
+  # C000 SBC $D0,X
+  # C002 BRK
+  def test_SBC_zero_page_x
+    reset_and_load_memory %w[f5 d0 00]
+
+    @cpu.accumulator = 0x80
+    @cpu.x_register = 0x10
+    @cpu.set_flag(SR_CARRY)
+    @cpu.write_ram(address: 0x00e0, data: 0x80)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x00, @cpu.accumulator)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+  end
+
   # C000 SEC
   # C001 BRK
   def test_SEC
