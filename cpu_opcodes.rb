@@ -127,12 +127,15 @@ OPCODES = {
   0xd8 => %w[CLD implied     1 2],
   0xde => %w[DEC absolute_x  3 7],
 
+  0xe0 => %w[CPX immediate   2 2],
   0xe1 => %w[SBC indirect_x  2 6],
+  0xe4 => %w[CPX zero_page   2 3],
   0xe5 => %w[SBC zero_page   2 3],
   0xe6 => %w[INC zero_page   2 5],
   0xe8 => %w[INX implied     1 2],
   0xe9 => %w[SBC immediate   2 2],
   0xea => %w[NOP implied     1 2],
+  0xec => %w[CPX absolute    3 4],
   0xed => %w[SBC absolute    3 4],
   0xee => %w[INC absolute    3 6],
 

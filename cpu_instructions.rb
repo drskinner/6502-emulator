@@ -78,6 +78,13 @@ module CpuInstructions
     clear_flag(SR_OVERFLOW)
   end
 
+  def CPX(address:)
+    diff = (x_register + 0x100 - @ram[address]) & 0xff
+
+    x_register >= @ram[address] ? set_flag(SR_CARRY) : clear_flag(SR_CARRY)
+    ZN_flags(diff)
+  end
+
   #
   # Subtract 1 from memory with wrap-around.
   # We can simulate this wrapping with (byte + 0x100 - 0x01) & 0xff.

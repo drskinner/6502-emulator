@@ -553,6 +553,93 @@ class MyTest < Test::Unit::TestCase
     assert_equal(false, @cpu.set?(SR_OVERFLOW))
   end
 
+  # C000 CPX $C09F
+  # C003 BRK
+  # C004 CPX $C09F
+  # C007 BRK
+  # C008 CPX $9F
+  # C00B BRK
+  def test_CPX_absolute
+    reset_and_load_memory %w[ec 9f c0 00 ec 9f c0 00 ec 9f c0 00]
+
+    @cpu.x_register = 0x80
+    @cpu.write_ram(address: 0xc09f, data: 0x7f)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x80, @cpu.x_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+
+    @cpu.write_ram(address: 0xc09f, data: 0x80)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+
+    @cpu.write_ram(address: 0xc09f, data: 0xff)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+    assert_equal(false, @cpu.set?(SR_CARRY))
+  end
+
+  # C000 CPX #$7F
+  # C002 BRK
+  # C003 CPX #$80
+  # C005 BRK
+  # C006 CPX #$FF
+  # C008 BRK
+  def test_CPX_immediate
+    reset_and_load_memory %w[e0 7f 00 e0 80 00 e0 ff 00]
+
+    @cpu.x_register = 0x80
+    @cpu.execute(address: @base_address)
+    assert_equal(0x80, @cpu.x_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))   
+
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+    assert_equal(false, @cpu.set?(SR_CARRY))
+  end
+
+  # CPX $9F
+  # BRK
+  # CPX $9F
+  # BRK
+  # CPX $9F
+  # BRK
+  def test_CPX_zero_page
+    reset_and_load_memory %w[e4 9f 00 e4 9f 00 e4 9f 00]
+
+    @cpu.x_register = 0x80
+    @cpu.write_ram(address: 0x009f, data: 0x7f)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x80, @cpu.x_register)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))
+
+    @cpu.write_ram(address: 0x009f, data: 0x80)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(true, @cpu.set?(SR_ZERO))
+    assert_equal(false, @cpu.set?(SR_NEGATIVE))
+    assert_equal(true, @cpu.set?(SR_CARRY))   
+
+    @cpu.write_ram(address: 0x009f, data: 0xff)
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(false, @cpu.set?(SR_ZERO))
+    assert_equal(true, @cpu.set?(SR_NEGATIVE))
+    assert_equal(false, @cpu.set?(SR_CARRY))
+  end
+
   # C000 DEC $C010 ; absolute
   # C003 BRK
   def test_DEC_absolute
