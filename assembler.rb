@@ -55,6 +55,9 @@ class Assembler
         puts " ($#{byte operand1},X)"
       when 'indirect_y'
         puts " ($#{byte operand1}),Y"
+      when 'relative'
+        next_address = (@memory_pager + 0x02) & 0xffff
+        puts " $#{word(next_address + operand1.chr.unpack('c').first)}"
       when 'zero_page'
         puts " $#{byte operand1}"
       when 'zero_page_x'

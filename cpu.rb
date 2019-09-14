@@ -76,6 +76,7 @@ class Cpu
       puts "Executing #{'%04X' % @program_counter}: #{instruction} (#{address_mode})" if @log
       method(instruction).call(address: method(address_mode).call)
 
+      # prevent off-by-one errors in some instructions
       @program_counter += 1 unless %w[HLT JMP JSR].include?(instruction)
     end
   end

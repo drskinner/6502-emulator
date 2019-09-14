@@ -12,6 +12,7 @@ OPCODES = {
   0x0d => %w[ORA absolute    3 4],
   0x0e => %w[ASL absolute    3 6],
 
+  0x10 => %w[BPL relative    2 2],
   0x11 => %w[ORA indirect_y  2 5],
   0x15 => %w[ORA zero_page_x 2 4],
   0x16 => %w[ASL zero_page_x 2 6],
@@ -31,6 +32,7 @@ OPCODES = {
   0x2d => %w[AND absolute    3 4],
   0x2e => %w[ROL absolute    3 6],
 
+  0x30 => %w[BMI relative    2 2],
   0x31 => %w[AND indirect_y  2 5],
   0x35 => %w[AND zero_page_x 2 4],
   0x36 => %w[ROL zero_page_x 2 6],
@@ -49,6 +51,7 @@ OPCODES = {
   0x4d => %w[EOR absolute    3 4],
   0x4e => %w[LSR absolute    3 6],
 
+  0x50 => %w[BVC relative    2 2],
   0x51 => %w[EOR indirect_y  2 5],
   0x55 => %w[EOR zero_page_x 2 4],
   0x56 => %w[LSR zero_page_x 2 6],
@@ -67,6 +70,7 @@ OPCODES = {
   0x6d => %w[ADC absolute    3 4],
   0x6e => %w[ROR absolute    3 6],
 
+  0x70 => %w[BVS relative    2 2],
   0x71 => %w[ADC indirect_y  2 5],
   0x75 => %w[ADC zero_page_x 2 4],
   0x76 => %w[ROR zero_page_x 2 6],
@@ -85,6 +89,7 @@ OPCODES = {
   0x8d => %w[STA absolute    3 4],
   0x8e => %w[STX absolute    3 4],
 
+  0x90 => %w[BCC relative    2 2],
   0x91 => %w[STA indirect_y  2 6],
   0x94 => %w[STY zero_page_x 2 3],
   0x95 => %w[STA zero_page_x 2 4],
@@ -107,6 +112,7 @@ OPCODES = {
   0xad => %w[LDA absolute    3 4],
   0xae => %w[LDX absolute    3 4],
 
+  0xb0 => %w[BCS relative    2 2],
   0xb1 => %w[LDA indirect_y  2 5],
   0xb4 => %w[LDY zero_page_x 2 4],
   0xb5 => %w[LDA zero_page_x 2 4],
@@ -130,6 +136,7 @@ OPCODES = {
   0xcd => %w[CMP absolute    3 4],
   0xce => %w[DEC absolute    3 6],
 
+  0xd0 => %w[BNE relative    2 2],
   0xd1 => %w[CMP indirect_y  2 5],
   0xd5 => %w[CMP zero_page_x 2 4],
   0xd6 => %w[DEC zero_page_x 2 6],
@@ -150,6 +157,7 @@ OPCODES = {
   0xed => %w[SBC absolute    3 4],
   0xee => %w[INC absolute    3 6],
 
+  0xf0 => %w[BEQ relative    2 2],
   0xf1 => %w[SBC indirect_y  2 5],
   0xf5 => %w[SBC zero_page_x 2 5],
   0xf6 => %w[INC zero_page_x 2 6],

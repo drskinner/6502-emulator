@@ -433,6 +433,99 @@ class MyTest < Test::Unit::TestCase
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
   end
 
+  # C000 BCC $C005
+  # C002 LDA #$01
+  # C004 BRK
+  # C005 LDA #$02
+  # C007 BRK
+  # C008 BCC $C005
+  # C00A LDA #$03
+  # C00C BRK
+  def test_BCC
+    reset_and_load_memory %w[90 03 a9 01 00 a9 02 00 90 fb a9 03 00]
+
+    # forward branch
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+
+    # no branch
+    @cpu.set_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x01, @cpu.accumulator)
+    assert_equal(0xc005, @cpu.program_counter)
+
+    # backward branch
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.program_counter = 0xc008
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+  end
+
+  # C000 BCS $C005
+  # C002 LDA #$01
+  # C004 BRK
+  # C005 LDA #$02
+  # C007 BRK
+  # C008 BCS $C005
+  # C00A LDA #$03
+  # C00C BRK
+  def test_BCS
+    reset_and_load_memory %w[b0 03 a9 01 00 a9 02 00 b0 fb a9 03 00]
+
+    # forward branch
+    @cpu.set_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+
+    # no branch
+    @cpu.clear_flag(SR_CARRY)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x01, @cpu.accumulator)
+    assert_equal(0xc005, @cpu.program_counter)
+
+    # backward branch
+    @cpu.set_flag(SR_CARRY)
+    @cpu.program_counter = 0xc008
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+  end
+
+  # C000 BEQ $C005
+  # C002 LDA #$01
+  # C004 BRK
+  # C005 LDA #$02
+  # C007 BRK
+  # C008 BEQ $C005
+  # C00A LDA #$03
+  # C00C BRK
+  def test_BEQ
+    reset_and_load_memory %w[f0 03 a9 01 00 a9 02 00 f0 fb a9 03 00]
+
+    # forward branch
+    @cpu.set_flag(SR_ZERO)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+
+    # no branch
+    @cpu.clear_flag(SR_ZERO)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x01, @cpu.accumulator)
+    assert_equal(0xc005, @cpu.program_counter)
+
+    # backward branch
+    @cpu.set_flag(SR_ZERO)
+    @cpu.program_counter = 0xc008
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+  end
+
   # C000 BIT $C07F
   # C002 BRK
   # C003 BIT $C07F
@@ -503,6 +596,99 @@ class MyTest < Test::Unit::TestCase
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
   end
 
+  # C000 BMI $C005
+  # C002 LDA #$01
+  # C004 BRK
+  # C005 LDA #$02
+  # C007 BRK
+  # C008 BMI $C005
+  # C00A LDA #$03
+  # C00C BRK
+  def test_BMI
+    reset_and_load_memory %w[30 03 a9 01 00 a9 02 00 30 fb a9 03 00]
+
+    # forward branch
+    @cpu.set_flag(SR_NEGATIVE)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+
+    # no branch
+    @cpu.clear_flag(SR_NEGATIVE)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x01, @cpu.accumulator)
+    assert_equal(0xc005, @cpu.program_counter)
+
+    # backward branch
+    @cpu.set_flag(SR_NEGATIVE)
+    @cpu.program_counter = 0xc008
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+  end
+
+  # C000 BNE $C005
+  # C002 LDA #$01
+  # C004 BRK
+  # C005 LDA #$02
+  # C007 BRK
+  # C008 BNE $C005
+  # C00A LDA #$03
+  # C00C BRK
+  def test_BNE
+    reset_and_load_memory %w[d0 03 a9 01 00 a9 02 00 d0 fb a9 03 00]
+
+    # forward branch
+    @cpu.clear_flag(SR_ZERO)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+
+    # no branch
+    @cpu.set_flag(SR_ZERO)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x01, @cpu.accumulator)
+    assert_equal(0xc005, @cpu.program_counter)
+
+    # backward branch
+    @cpu.clear_flag(SR_ZERO)
+    @cpu.program_counter = 0xc008
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+  end
+
+  # C000 BPL $C005
+  # C002 LDA #$01
+  # C004 BRK
+  # C005 LDA #$02
+  # C007 BRK
+  # C008 BPL $C005
+  # C00A LDA #$03
+  # C00C BRK
+  def test_BPL
+    reset_and_load_memory %w[10 03 a9 01 00 a9 02 00 10 fb a9 03 00]
+
+    # forward branch
+    @cpu.clear_flag(SR_NEGATIVE)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+
+    # no branch
+    @cpu.set_flag(SR_NEGATIVE)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x01, @cpu.accumulator)
+    assert_equal(0xc005, @cpu.program_counter)
+
+    # backward branch
+    @cpu.clear_flag(SR_NEGATIVE)
+    @cpu.program_counter = 0xc008
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+  end
+
   # C000 BRK
   def test_BRK
     reset_and_load_memory %w[00]
@@ -511,6 +697,68 @@ class MyTest < Test::Unit::TestCase
     @cpu.execute(address: @base_address)
     assert_equal(true, @cpu.set?(SR_BREAK))
     assert_equal(@base_address + 0x01, @cpu.program_counter)
+  end
+
+  # C000 BVC $C005
+  # C002 LDA #$01
+  # C004 BRK
+  # C005 LDA #$02
+  # C007 BRK
+  # C008 BVC $C005
+  # C00A LDA #$03
+  # C00C BRK
+  def test_BVC
+    reset_and_load_memory %w[50 03 a9 01 00 a9 02 00 50 fb a9 03 00]
+
+    # forward branch
+    @cpu.clear_flag(SR_OVERFLOW)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+
+    # no branch
+    @cpu.set_flag(SR_OVERFLOW)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x01, @cpu.accumulator)
+    assert_equal(0xc005, @cpu.program_counter)
+
+    # backward branch
+    @cpu.clear_flag(SR_OVERFLOW)
+    @cpu.program_counter = 0xc008
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+  end
+
+  # C000 BVS $C005
+  # C002 LDA #$01
+  # C004 BRK
+  # C005 LDA #$02
+  # C007 BRK
+  # C008 BVS $C005
+  # C00A LDA #$03
+  # C00C BRK
+  def test_BVS
+    reset_and_load_memory %w[70 03 a9 01 00 a9 02 00 70 fb a9 03 00]
+
+    # forward branch
+    @cpu.set_flag(SR_OVERFLOW)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
+
+    # no branch
+    @cpu.clear_flag(SR_OVERFLOW)
+    @cpu.execute(address: @base_address)
+    assert_equal(0x01, @cpu.accumulator)
+    assert_equal(0xc005, @cpu.program_counter)
+
+    # backward branch
+    @cpu.set_flag(SR_OVERFLOW)
+    @cpu.program_counter = 0xc008
+    @cpu.execute(address: @cpu.program_counter)
+    assert_equal(0x02, @cpu.accumulator)
+    assert_equal(0xc008, @cpu.program_counter)
   end
 
   # C000 CLC

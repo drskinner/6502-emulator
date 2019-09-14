@@ -2,6 +2,13 @@ require './cpu_status_flags.rb'
 
 module CpuInstructions
   #
+  # A little helper to turn a byte into a signed integer
+  #
+  def signed_int(byte)
+    byte.chr.unpack('c').first
+  end
+
+  #
   # ADC can be very complicated, especially WRT the V flag.
   # There's lots of material online about 1s- and 2-complements,
   # signed 8-bit integers, and clever XORs but here, performance 
@@ -10,8 +17,8 @@ module CpuInstructions
   # TODO: Also, Decimal Mode is a fun complication.
   #
   def ADC(address:)
-    signed_a = @accumulator.chr.unpack('c').first
-    signed_m = @ram[address].chr.unpack('c').first
+    signed_a = signed_int(@accumulator)
+    signed_m = signed_int(@ram[address])
     signed_sum = signed_a + signed_m
     (signed_sum > 127 || signed_sum < -128) ? set_flag(SR_OVERFLOW) : clear_flag(SR_OVERFLOW)
 
@@ -40,6 +47,29 @@ module CpuInstructions
   end
 
   #
+  # TODO: All the branch instructions will require an extra
+  # clock cycle if the branch is taken and another cycle when
+  # a page boundary is crossed.
+  #
+  def BCC(address:)
+    unless set?(SR_CARRY)
+      @program_counter += signed_int(@ram[address])
+    end
+  end
+
+  def BCS(address:)
+    if set?(SR_CARRY)
+      @program_counter += signed_int(@ram[address])
+    end
+  end
+
+  def BEQ(address:)
+    if set?(SR_ZERO)
+      @program_counter += signed_int(@ram[address])
+    end
+  end
+
+  #
   # BIT has always seemed a little weird...
   # Only flags are affected; not memory or AC.
   #
@@ -48,6 +78,36 @@ module CpuInstructions
     tmp.zero? ? set_flag(SR_ZERO) : clear_flag(SR_ZERO)
     (tmp & SR_NEGATIVE).zero? ? clear_flag(SR_NEGATIVE) : set_flag(SR_NEGATIVE)
     (tmp & SR_OVERFLOW).zero? ? clear_flag(SR_OVERFLOW) : set_flag(SR_OVERFLOW)
+  end
+
+  def BMI(address:)
+    if set?(SR_NEGATIVE)
+      @program_counter += signed_int(@ram[address])
+    end
+  end
+
+  def BNE(address:)
+    unless set?(SR_ZERO)
+      @program_counter += signed_int(@ram[address])
+    end
+  end
+
+  def BPL(address:)
+    unless set?(SR_NEGATIVE)
+      @program_counter += signed_int(@ram[address])
+    end
+  end
+
+  def BVC(address:)
+    unless set?(SR_OVERFLOW)
+      @program_counter += signed_int(@ram[address])
+    end
+  end
+
+  def BVS(address:)
+    if set?(SR_OVERFLOW)
+      @program_counter += signed_int(@ram[address])
+    end
   end
 
   #

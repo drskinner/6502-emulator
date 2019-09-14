@@ -18,6 +18,12 @@ module CpuAddressModes
     @program_counter += 1
   end
 
+  # Relative mode, like immediate mode, will use the byte after
+  # the opcode as its operand.
+  def relative
+    @program_counter += 1
+  end
+
   # In zero_page mode, the operand is an address of the form 0x00nn.
   # We can simply return this byte as an address.
   def zero_page
