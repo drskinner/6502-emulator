@@ -116,6 +116,9 @@ module CpuInstructions
   # Also, for some reason the unused flag (bit 5) gets set
   # as a side-effect, at least on VICE's C= 128.
   #
+  # TODO: the "real" BRK advances the program counter twice
+  # even though it is a one-byte instruction.
+  #
   def BRK(address:)
     set_flag(SR_BREAK)
     set_flag(SR_UNUSED)
@@ -221,6 +224,21 @@ module CpuInstructions
   end
 
   #
+  # JSR pushes the return address minus 0x01 onto the stack.
+  # My guess is that RTS grabs the return address and increments
+  # the program counter as part of its execution.
+  #
+  # Remember, addresses are little-endian. High byte gets pushed
+  # first, followed by low byte.
+  #
+  def JSR(address:)
+    stack_push_byte(byte: (@program_counter >> 8))
+    stack_push_byte(byte: (@program_counter & 0x00ff))
+
+    @program_counter = address
+  end
+
+  #
   # Load Accumulator with a byte value. Has many address modes.
   # Z flag set if AC == 0; N flag set if AC bit 7 is set
   #
@@ -307,6 +325,13 @@ module CpuInstructions
       @ram[address] = ((@ram[address] >> 1) & 0xff) + (cached_carry_bit * 0x80)
       ZN_flags(@ram[address])
     end
+  end
+
+  def RTS(address:)
+    lo = stack_pull_byte
+    hi = stack_pull_byte
+
+    @program_counter = (hi << 8) + lo
   end
 
   #

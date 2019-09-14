@@ -1554,6 +1554,21 @@ class MyTest < Test::Unit::TestCase
     assert_equal(0xc00b, @cpu.program_counter)
   end
 
+  # C000 JSR $C005
+  # C003 BRK
+  # C004 BRK
+  # C005 HLT
+  def test_JSR
+    reset_and_load_memory %w[20 05 c0 00 00 02]
+
+    @cpu.stack_pointer = 0xff
+    @cpu.execute(address: @base_address)
+    assert_equal(0xfd, @cpu.stack_pointer)
+    assert_equal(0x02, @cpu.read_ram(address: 0x01fe))
+    assert_equal(0xc0, @cpu.read_ram(address: 0x01ff))
+    assert_equal(0xc005, @cpu.program_counter)
+  end
+
   # C000 LDA $C008   ; absolute
   # C003 BRK
   def test_LDA_absolute
@@ -2363,6 +2378,20 @@ class MyTest < Test::Unit::TestCase
     assert_equal(true, @cpu.set?(SR_CARRY))
     assert_equal(false, @cpu.set?(SR_ZERO))
     assert_equal(false, @cpu.set?(SR_NEGATIVE))
+  end
+
+  # C000 JSR $C005
+  # C003 HLT
+  # C004 BRK
+  # C005 RTS
+  # C006 BRK
+  def test_RTS
+    reset_and_load_memory %w[20 05 c0 02 00 60 00]
+
+    @cpu.stack_pointer = 0xff
+    @cpu.execute(address: @base_address)
+    assert_equal(0xff, @cpu.stack_pointer)
+    assert_equal(0xc003, @cpu.program_counter)
   end
 
   # C000 SBC $C0D0

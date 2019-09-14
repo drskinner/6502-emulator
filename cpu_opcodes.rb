@@ -21,6 +21,7 @@ OPCODES = {
   0x1d => %w[ORA absolute_x  3 4],
   0x1e => %w[ASL absolute_x  3 7],
 
+  0x20 => %w[JSR absolute    3 6],
   0x21 => %w[AND indirect_x  2 6],
   0x24 => %w[BIT zero_page   2 3],
   0x25 => %w[AND zero_page   2 3],
@@ -60,6 +61,7 @@ OPCODES = {
   0x5d => %w[EOR absolute_x  3 4],
   0x5e => %w[LSR absolute_x  3 7],
 
+  0x60 => %w[RTS implied     1 6],
   0x61 => %w[ADC indirect_x  2 6],
   0x65 => %w[ADC zero_page   2 3],
   0x66 => %w[ROR zero_page   2 5],
