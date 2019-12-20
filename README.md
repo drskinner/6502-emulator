@@ -11,8 +11,8 @@ From the command line, `ruby ./mon.rb` will start up the virtual machine and dro
 
 Implemented montior features:
 
-* `D <address>` - disassemble memory starting from address.
-* `G <address>` - execute machine code starting at address.
+* `d <address>` - disassemble memory starting from address.
+* `g <address>` - execute machine code starting at address.
 * `l <filename>` - load program from disk.
 * `m <start> <end>` - hex dump range of memory addresses.
 * `r` - dispaly 6502 registers (`PC SR AC XR YR SP`).
