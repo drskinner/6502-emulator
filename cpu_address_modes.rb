@@ -133,6 +133,6 @@ module CpuAddressModes
     lo = @ram[zero_page_address] & 0xff
     hi = @ram[zero_page_address + 1] & 0xff
 
-    (hi * 0x0100 + lo + @y_register) & 0xffff
+    (hi * 0x0100 + lo) & 0xffff
   end
 end
